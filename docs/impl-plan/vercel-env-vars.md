@@ -34,8 +34,8 @@ Prefixed with `NEXT_PUBLIC_` — included in the browser bundle.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `CLERK_SIGN_IN_URL` | Sign-in page path | `/login` |
-| `CLERK_SIGN_UP_URL` | Sign-up page path | `/signup` |
+| `CLERK_SIGN_IN_URL` | Sign-in page path | `/sign-in` |
+| `CLERK_SIGN_UP_URL` | Sign-up page path | `/sign-up` |
 | `CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | Redirect after sign-in | `/dashboard` |
 | `CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | Redirect after sign-up | `/onboarding` |
 

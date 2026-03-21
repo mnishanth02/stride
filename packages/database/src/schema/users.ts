@@ -20,7 +20,7 @@ export const users = pgTable(
     emailVerified: boolean("email_verified").default(false),
     fullName: text("full_name"),
     avatarUrl: text("avatar_url"),
-    bio: text("bio"),
+
     tagline: text("tagline"),
     athleteTypes: text("athlete_types").array(),
     story: text("story"),

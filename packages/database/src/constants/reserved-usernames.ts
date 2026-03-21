@@ -14,6 +14,8 @@ export const RESERVED_USERNAMES = new Set([
   "privacy",
   "explore",
   "search",
+  "sign-in",
+  "sign-up",
 ])
 
 export function isReservedUsername(username: string): boolean {

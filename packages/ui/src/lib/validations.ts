@@ -20,6 +20,7 @@ export const RESERVED_USERNAMES = [
   "terms",
   "privacy",
   "explore",
+  "search",
 ] as const
 
 /** Accepted image MIME types */
@@ -101,14 +102,22 @@ export const usernameSchema = z
     `Username must be at most ${TEXT_LIMITS.username.max} characters`
   )
   .regex(
-    /^[a-z0-9_-]+$/,
-    "Only lowercase letters, numbers, hyphens, and underscores"
+    /^[a-z0-9][a-z0-9_-]*[a-z0-9]$/,
+    "Username must start and end with a letter or number, and can only contain lowercase letters, numbers, hyphens, and underscores"
   )
   .refine(
     (val) =>
       !RESERVED_USERNAMES.includes(val as (typeof RESERVED_USERNAMES)[number]),
     "This username is reserved"
   )
+
+export const emailSchema = z
+  .string()
+  .email("Please enter a valid email address")
+
+export const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
 
 export const taglineSchema = z
   .string()

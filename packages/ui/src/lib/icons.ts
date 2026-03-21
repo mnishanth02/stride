@@ -19,6 +19,7 @@ import { Fire } from "@phosphor-icons/react/dist/icons/Fire"
 import { Gauge } from "@phosphor-icons/react/dist/icons/Gauge"
 import { GearSix } from "@phosphor-icons/react/dist/icons/GearSix"
 import { GlobeSimple } from "@phosphor-icons/react/dist/icons/GlobeSimple"
+import { GoogleLogo } from "@phosphor-icons/react/dist/icons/GoogleLogo"
 import { Heart } from "@phosphor-icons/react/dist/icons/Heart"
 import { House } from "@phosphor-icons/react/dist/icons/House"
 import { Image } from "@phosphor-icons/react/dist/icons/Image"
@@ -71,6 +72,9 @@ export const Icons = {
   signOut: SignOut,
   user: User,
   userCircle: UserCircle,
+
+  // Social / OAuth
+  google: GoogleLogo,
 
   // Theme
   sun: Sun,
