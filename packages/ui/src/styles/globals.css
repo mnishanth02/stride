@@ -51,13 +51,13 @@
   --purple-900: oklch(0.31 0.098 300);
   --purple-950: oklch(0.218 0.068 300);
 
-  /* Motion tokens (REQ-014) */
+  /* Motion tokens (REQ-014) — values match design system v3.0 */
   --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --duration-micro: 100ms;
-  --duration-fast: 200ms;
-  --duration-base: 300ms;
-  --duration-slow: 500ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
 }
 
 /* ---------------------------------------------------------------------------
@@ -298,5 +298,20 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced Motion (REQ-003)
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
