@@ -4,17 +4,20 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "check:staged": "biome check --staged --files-ignore-unknown=true --no-errors-on-unmatched",
+    "check:staged:write": "biome check --write --staged --files-ignore-unknown=true --no-errors-on-unmatched",
     "dev": "turbo dev",
-    "lint": "turbo lint",
-    "format": "turbo format",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "prepare": "husky",
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {
-    "@workspace/eslint-config": "workspace:*",
+    "@biomejs/biome": "2.4.8",
     "@workspace/typescript-config": "workspace:*",
-    "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
-    "turbo": "^2.8.17",
+    "husky": "^9.1.7",
+    "turbo": "^2.8.20",
     "typescript": "5.9.3"
   },
   "packageManager": "pnpm@9.15.9",
