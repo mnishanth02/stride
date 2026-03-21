@@ -18,6 +18,7 @@ const currentSession = (await loadCurrentSession()) || {
   status: "In progress",
   focus: "Active implementation session",
   touchedFiles: [],
+  firstPrompt: null,
   transcriptPath: input.transcript_path || null,
   lastUpdated: input.timestamp || new Date().toISOString(),
 }
@@ -29,6 +30,10 @@ if (trackedPaths.length > 0) {
     ...new Set([...(currentSession.touchedFiles || []), ...trackedPaths]),
   ]
   currentSession.focus = `Working in ${currentSession.touchedFiles[0]}`
+}
+
+if (!currentSession.firstPrompt && input.user_prompt) {
+  currentSession.firstPrompt = String(input.user_prompt).slice(0, 500)
 }
 
 currentSession.transcriptPath =

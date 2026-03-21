@@ -34,6 +34,59 @@ const IGNORED_PATHS = new Set([
   "bun.lockb",
 ])
 
+const CATEGORY_PATTERNS = [
+  {
+    category: "Bug Fix",
+    pattern:
+      /\b(fix(es|ed|ing)?|bug(s)?|defect|broken|crash(es|ed|ing)?|patch|hotfix|regression|debug(ging)?)\b/i,
+  },
+  {
+    category: "Refactor",
+    pattern:
+      /\b(refactor(ed|ing)?|restructur(e|ed|ing)|clean\s*up|reorganiz(e|ed|ing)|simplif(y|ied|ying))\b/i,
+  },
+  {
+    category: "Design/Architecture",
+    pattern:
+      /\b(design\s+(system|decision|pattern|document)|architecture|adr|rfc|specification|proposal|tech\s+debt)\b/i,
+  },
+  {
+    category: "Infrastructure",
+    pattern:
+      /\b(ci\/cd|pipeline|deploy(ment)?|docker|monorepo|workspace\s+setup|eslint|biome|prettier|tooling|drizzle\s+config)\b/i,
+  },
+]
+
+const INFRA_PATH_PATTERNS = [
+  /^\.github\//,
+  /^\.husky\//,
+  /biome\.json$/,
+  /tsconfig.*\.json$/,
+  /turbo\.json$/,
+  /drizzle\.config/,
+  /package\.json$/,
+  /postcss/,
+  /next\.config/,
+]
+
+const DESIGN_PATH_PATTERNS = [/^docs\/impl-plan\//, /^docs\/core-plan\//]
+
+const DIRECTORY_LABELS = {
+  "apps/web": "Web App",
+  "packages/database": "Database",
+  "packages/ui": "Shared UI",
+  "packages/storage": "Storage",
+  "packages/typescript-config": "TypeScript Config",
+  ".github": "CI/CD & Hooks",
+  docs: "Documentation",
+}
+
+const TRIVIAL_PROMPTS =
+  /^(start implementation|continue|go ahead|do it|implement|fix it|yes|no|ok|okay|sure|thanks|thank you|looks good|lgtm|proceed|next|done)$/i
+
+const DECISION_PATTERN =
+  /\b(decided to|chose|switched to|went with|picked|selected|opted for|settled on)\b[^.!?\n]*/i
+
 export async function readHookInput() {
   let raw = ""
 
@@ -112,36 +165,169 @@ export function extractTrackedPaths(toolName, toolInput) {
   return [...matches]
 }
 
+export function shouldLogSession({ currentSession, allUserPrompts }) {
+  const touchedFiles = Array.isArray(currentSession?.touchedFiles)
+    ? currentSession.touchedFiles
+    : []
+
+  if (touchedFiles.length > 0) {
+    return true
+  }
+
+  const startedAt = currentSession?.startedAt
+    ? new Date(currentSession.startedAt)
+    : null
+  const now = new Date()
+
+  if (startedAt && now - startedAt < 60_000) {
+    return false
+  }
+
+  const totalWords = allUserPrompts
+    .join(" ")
+    .split(/\s+/)
+    .filter(Boolean).length
+
+  if (totalWords > 100) {
+    return true
+  }
+
+  if (totalWords < 20) {
+    return false
+  }
+
+  return true
+}
+
+export function inferCategory({ allUserPrompts, touchedFiles }) {
+  const combinedText = allUserPrompts.join(" ")
+  const files = Array.isArray(touchedFiles) ? touchedFiles : []
+
+  for (const { category, pattern } of CATEGORY_PATTERNS) {
+    if (pattern.test(combinedText)) {
+      return category
+    }
+  }
+
+  if (files.length > 0) {
+    if (files.every((f) => INFRA_PATH_PATTERNS.some((p) => p.test(f)))) {
+      return "Infrastructure"
+    }
+
+    if (files.every((f) => DESIGN_PATH_PATTERNS.some((p) => p.test(f)))) {
+      return "Design/Architecture"
+    }
+  }
+
+  return files.length > 0 ? "Feature" : "Design/Architecture"
+}
+
+export async function inferFeature({ allUserPrompts, touchedFiles }) {
+  const files = Array.isArray(touchedFiles) ? touchedFiles : []
+  const combinedText = allUserPrompts.join(" ").toLowerCase()
+
+  const implPlanFiles = files.filter((f) => f.startsWith("docs/impl-plan/"))
+
+  if (implPlanFiles.length > 0) {
+    const featureName = await readImplPlanTitle(implPlanFiles[0])
+
+    if (featureName) {
+      return featureName
+    }
+  }
+
+  try {
+    const implPlanDir = path.join(ROOT_DIR, "docs", "impl-plan")
+    const implFiles = await fs.readdir(implPlanDir)
+
+    for (const file of implFiles) {
+      if (!file.endsWith(".md") || file === "vercel-env-vars.md") {
+        continue
+      }
+
+      const slug = file.replace(/\.md$/, "").replace(/-\d+$/, "")
+      const words = slug.split("-").filter((w) => w.length > 2)
+
+      if (words.length >= 2 && words.every((w) => combinedText.includes(w))) {
+        const title = await readImplPlanTitle(path.join("docs/impl-plan", file))
+
+        if (title) {
+          return title
+        }
+      }
+    }
+  } catch {
+    // no impl-plan directory
+  }
+
+  if (files.length > 0) {
+    const labels = new Set()
+
+    for (const file of files) {
+      for (const [prefix, label] of Object.entries(DIRECTORY_LABELS)) {
+        if (file.startsWith(prefix)) {
+          labels.add(label)
+          break
+        }
+      }
+    }
+
+    if (labels.size > 0) {
+      return [...labels].join(" & ")
+    }
+  }
+
+  return "General"
+}
+
 export async function deriveSessionSummary({ currentSession, transcriptPath }) {
   const transcriptText = await readTranscriptText(transcriptPath)
-  const latestUserPrompt = extractLatestUserPrompt(transcriptText)
+  const allUserPrompts = extractAllUserPrompts(
+    transcriptText,
+    currentSession?.firstPrompt
+  )
   const touchedFiles = Array.isArray(currentSession?.touchedFiles)
     ? currentSession.touchedFiles
     : []
   const touchedAreas = summarizeTouchedAreas(touchedFiles)
-  const usefulPrompt = normalizePrompt(latestUserPrompt)
 
-  if (touchedFiles.length === 0) {
+  const parts = []
+
+  const intentPrompt = findFirstSubstantivePrompt(allUserPrompts)
+
+  if (intentPrompt) {
+    parts.push(intentPrompt)
+  }
+
+  if (touchedFiles.length > 0) {
+    parts.push(`Modified ${touchedAreas}.`)
+  }
+
+  const decision = extractDecision(allUserPrompts)
+
+  if (decision) {
+    parts.push(decision)
+  }
+
+  const summary = parts.join(" ").trim()
+
+  if (!summary) {
     return {
-      outcome: usefulPrompt?.toLowerCase().includes("plan")
-        ? "📝 Planning"
-        : "📝 Research",
+      outcome: touchedFiles.length > 0 ? "✅ Updated" : "📝 Research",
       summary:
-        usefulPrompt ||
-        "Research or planning session with no tracked file changes",
+        touchedFiles.length > 0
+          ? `Updated ${touchedAreas}`
+          : "Research or planning session",
+      allUserPrompts,
     }
   }
 
-  if (usefulPrompt) {
-    return {
-      outcome: "✅ Updated",
-      summary: usefulPrompt,
-    }
-  }
+  const capped = summary.length > 400 ? `${summary.slice(0, 397)}...` : summary
 
   return {
-    outcome: "✅ Updated",
-    summary: `Updated ${touchedAreas}`,
+    outcome: touchedFiles.length > 0 ? "✅ Updated" : "📝 Research",
+    summary: capped,
+    allUserPrompts,
   }
 }
 
@@ -149,6 +335,8 @@ export function createHistoryEntry({
   currentSession,
   summary,
   outcome,
+  category,
+  feature,
   endedAt,
 }) {
   const files = Array.isArray(currentSession?.touchedFiles)
@@ -161,6 +349,8 @@ export function createHistoryEntry({
     endedAt,
     outcome,
     summary,
+    category: category || "Feature",
+    feature: feature || "General",
     files,
   }
 }
@@ -329,19 +519,19 @@ function renderActivityLog({ currentSession, history }) {
   return [
     "# AI Activity Log",
     "",
-    "This file is automatically maintained by workspace GitHub Copilot hooks. It tracks high-signal AI-assisted progress for this repository rather than every prompt or tool call.",
+    "This file is automatically maintained by workspace GitHub Copilot hooks. It captures meaningful AI-assisted progress — features, bug fixes, refactors, infrastructure changes, and design decisions — rather than every prompt or tool call.",
     "",
     `- **Last updated:** ${lastUpdated}`,
-    "- **Tracking mode:** Feature and milestone progress",
+    "- **Tracking mode:** Smart filtering (only significant sessions are logged)",
     "- **Hook config:** `.github/hooks/project-status.json`",
     "",
     "## Current Session",
     "",
     sessionSection,
     "",
-    "## Feature Progress History",
+    "## Feature Progress",
     "",
-    renderHistory(history),
+    renderGroupedHistory(history),
     "",
   ].join("\n")
 }
@@ -364,38 +554,80 @@ function renderCurrentSession(currentSession) {
   ].join("\n")
 }
 
-function renderHistory(history) {
+function renderGroupedHistory(history) {
   if (!Array.isArray(history) || history.length === 0) {
     return "No completed AI-assisted updates recorded yet."
   }
 
-  const rows = history.map((entry) => {
-    const endedAt = escapeTableText(formatShortDate(entry.endedAt))
-    const outcome = escapeTableText(entry.outcome || "📝 Research")
-    const summary = escapeTableText(entry.summary || "AI-assisted session")
-    const files = escapeTableText(formatFileList(entry.files || []))
+  const groups = new Map()
 
-    return `| ${endedAt} | ${outcome} | ${summary} | ${files} |`
+  for (const entry of history) {
+    const feature = entry.feature || "General"
+
+    if (!groups.has(feature)) {
+      groups.set(feature, [])
+    }
+
+    groups.get(feature).push(entry)
+  }
+
+  const sortedKeys = [...groups.keys()].sort((a, b) => {
+    if (a === "General") {
+      return 1
+    }
+
+    if (b === "General") {
+      return -1
+    }
+
+    const aLatest = groups.get(a)[0]?.endedAt || ""
+    const bLatest = groups.get(b)[0]?.endedAt || ""
+
+    return bLatest.localeCompare(aLatest)
   })
 
-  return [
-    "| Date | Outcome | Summary | Files |",
-    "| --- | --- | --- | --- |",
-    ...rows,
-  ].join("\n")
+  const sections = []
+
+  for (const feature of sortedKeys) {
+    const entries = groups.get(feature)
+    const latestDate = formatDateOnly(entries[0]?.endedAt)
+    const sessionCount = entries.length
+    const sessionWord = sessionCount === 1 ? "session" : "sessions"
+
+    sections.push(`### ${feature}`)
+    sections.push(
+      `> ${sessionCount} ${sessionWord} · Last updated: ${latestDate}`
+    )
+    sections.push("")
+
+    for (const entry of entries) {
+      const date = formatDateOnly(entry.endedAt)
+      const category = entry.category || "Uncategorized"
+      const summary = (entry.summary || "AI-assisted session")
+        .replaceAll("\\n", " ")
+        .replaceAll(/\s+/g, " ")
+      const files = formatFileList(entry.files || [])
+
+      sections.push(`- **${date}** [${category}] ${summary}`)
+      sections.push(`  — ${files}`)
+      sections.push("")
+    }
+  }
+
+  return sections.join("\n")
 }
 
-function formatShortDate(value) {
+function formatDateOnly(value) {
   if (!value) {
     return "Unknown"
   }
 
-  return String(value).replace("T", " ").replace(".000Z", " UTC")
+  return String(value).slice(0, 10)
 }
 
 function formatFileList(files) {
   if (!Array.isArray(files) || files.length === 0) {
-    return "No tracked files"
+    return "No file changes"
   }
 
   const limited = files.slice(0, 4).map((filePath) => `\`${filePath}\``)
@@ -532,32 +764,110 @@ function extractText(value) {
     .join(" ")
 }
 
-function normalizePrompt(prompt) {
-  const cleaned = String(prompt || "")
-    .replaceAll(/\s+/g, " ")
-    .trim()
+function extractAllUserPrompts(transcriptText, firstPromptFallback) {
+  const prompts = []
 
-  if (!cleaned) {
-    return ""
+  if (transcriptText) {
+    try {
+      const parsed = JSON.parse(transcriptText)
+      const messages = []
+
+      collectMessages(parsed, messages)
+
+      for (const msg of messages) {
+        if (msg.role === "user" && msg.text.trim()) {
+          const cleaned = normalizePromptText(msg.text.trim())
+
+          if (cleaned) {
+            prompts.push(cleaned)
+          }
+        }
+      }
+    } catch {
+      const textMatches = [
+        ...transcriptText.matchAll(/"prompt"\s*:\s*"([^"]+)"/g),
+      ].map((m) => m[1])
+
+      for (const match of textMatches) {
+        const cleaned = normalizePromptText(match)
+
+        if (cleaned) {
+          prompts.push(cleaned)
+        }
+      }
+    }
   }
 
-  if (
-    /^(start implementation|continue|go ahead|do it|implement|fix it)$/i.test(
-      cleaned
-    )
-  ) {
-    return ""
+  if (prompts.length === 0 && firstPromptFallback) {
+    const cleaned = normalizePromptText(firstPromptFallback)
+
+    if (cleaned) {
+      prompts.push(cleaned)
+    }
   }
 
-  if (cleaned.length > 140) {
-    return `${cleaned.slice(0, 137)}...`
-  }
-
-  return cleaned
+  return prompts
 }
 
-function escapeTableText(value) {
-  return String(value || "")
-    .replaceAll("|", "\\|")
-    .replaceAll("\n", " ")
+function findFirstSubstantivePrompt(prompts) {
+  for (const prompt of prompts) {
+    if (TRIVIAL_PROMPTS.test(prompt)) {
+      continue
+    }
+
+    if (prompt.split(/\s+/).length < 3) {
+      continue
+    }
+
+    return prompt.length > 200 ? `${prompt.slice(0, 197)}...` : prompt
+  }
+
+  return ""
+}
+
+function extractDecision(prompts) {
+  for (const prompt of prompts) {
+    const match = prompt.match(DECISION_PATTERN)
+
+    if (match) {
+      const beforeMatch = prompt.lastIndexOf(".", match.index - 1) + 1
+      const afterMatch = prompt.indexOf(".", match.index + match[0].length)
+      const sentence = prompt
+        .slice(beforeMatch, afterMatch > -1 ? afterMatch + 1 : undefined)
+        .trim()
+
+      if (sentence.length > 150) {
+        return `${sentence.slice(0, 147)}...`
+      }
+
+      return sentence
+    }
+  }
+
+  return ""
+}
+
+async function readImplPlanTitle(relativePath) {
+  try {
+    const fullPath = path.join(ROOT_DIR, relativePath)
+    const content = await fs.readFile(fullPath, "utf8")
+    const match = content.match(/^#\s+(.+)/m)
+
+    if (match) {
+      return match[1]
+        .trim()
+        .replace(/^Module \d+[.:]\s*/i, "")
+        .replace(/^Feature[.:]\s*/i, "")
+    }
+  } catch {
+    // file not readable
+  }
+
+  return null
+}
+
+function normalizePromptText(prompt) {
+  return String(prompt || "")
+    .replaceAll(/\s+/g, " ")
+    .trim()
 }

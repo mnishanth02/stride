@@ -16,6 +16,7 @@ const currentSession = {
   status: "In progress",
   focus: "Awaiting task details",
   touchedFiles: [],
+  firstPrompt: null,
   transcriptPath: input.transcript_path || null,
   lastUpdated: input.timestamp || new Date().toISOString(),
 }
