@@ -1,15 +1,9 @@
-import { Geist_Mono, Inter } from "next/font/google"
-
+import { ClerkProvider } from "@clerk/nextjs"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
+import { PostHogProvider } from "@/components/posthog-provider"
 import { ThemeProvider } from "@/components/theme-provider"
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
+import { fontBody, fontDisplay, fontMono } from "@/lib/fonts"
 
 export default function RootLayout({
   children,
@@ -17,19 +11,23 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        inter.variable
-      )}
-    >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={cn(
+          "antialiased",
+          fontDisplay.variable,
+          fontBody.variable,
+          fontMono.variable
+        )}
+      >
+        <body>
+          <PostHogProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </PostHogProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

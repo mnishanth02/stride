@@ -1,0 +1,29 @@
+{
+  "name": "@workspace/database",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1",
+    "@neondatabase/serverless": "^1.0.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10",
+    "dotenv": "^16.5.0",
+    "typescript": "^5.9.3",
+    "@workspace/typescript-config": "workspace:*"
+  },
+  "exports": {
+    "./client": "./src/client.ts",
+    "./schema": "./src/schema/index.ts",
+    "./types": "./src/types.ts",
+    "./constants/*": "./src/constants/*.ts"
+  }
+}
