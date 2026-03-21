@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "node .github/hooks/scripts/session-start.mjs",
+        "cwd": ".",
+        "timeout": 15
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "node .github/hooks/scripts/collect-progress.mjs",
+        "cwd": ".",
+        "timeout": 15
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node .github/hooks/scripts/finalize-status.mjs",
+        "cwd": ".",
+        "timeout": 15
+      }
+    ]
+  }
+}

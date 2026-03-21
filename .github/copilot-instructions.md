@@ -34,9 +34,12 @@
 - `docs/impl-plan/vercel-env-vars.md`: required environment variables for local, preview, and production setups.
 - `docs/core-plan/design-system.md`: brand, theme, and design-system rules.
 - `README.md`: monorepo and UI package quick-start notes.
+- `AI_ACTIVITY_LOG.md`: canonical AI-assisted project progress tracker maintained by workspace hooks.
+- `.github/hooks/project-status.json`: workspace hook entry point for AI activity tracking.
 
 ## Agent Hints
 
 - Check `turbo.json`, root `package.json`, and app/package `package.json` files before adding or changing scripts.
 - When working in `apps/web`, inspect nearby route handlers, providers, and helpers before introducing new patterns.
 - Keep instructions concise in future updates: link to the existing docs above instead of duplicating long implementation plans.
+- Keep `AI_ACTIVITY_LOG.md` up to date through the workspace hook flow instead of manually appending ad-hoc status notes.
