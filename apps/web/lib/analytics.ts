@@ -7,9 +7,10 @@ function isAnalyticsReady(): boolean {
 export function identifyUser(
   userId: string,
   properties?: Record<string, unknown>
-): void {
-  if (!isAnalyticsReady()) return
+): boolean {
+  if (!isAnalyticsReady()) return false
   posthog.identify(userId, properties)
+  return true
 }
 
 export function trackEvent(

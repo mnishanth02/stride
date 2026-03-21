@@ -1,4 +1,11 @@
-import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import {
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core"
 import { users } from "./users"
 
 export const achievements = pgTable(
@@ -9,9 +16,9 @@ export const achievements = pgTable(
       .notNull()
       .references(() => users.id),
     title: text("title").notNull(),
-    description: text("description"),
-    iconUrl: text("icon_url"),
-    earnedAt: timestamp("earned_at", { withTimezone: true, mode: "date" }),
+    category: text("category").notNull(),
+    badgeUrl: text("badge_url"),
+    year: integer("year"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),

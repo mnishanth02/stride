@@ -1,4 +1,5 @@
 import {
+  date,
   index,
   integer,
   pgTable,
@@ -16,10 +17,12 @@ export const highlights = pgTable(
       .notNull()
       .references(() => users.id),
     title: text("title").notNull(),
-    description: text("description"),
-    mediaUrl: text("media_url"),
-    mediaType: text("media_type"),
-    displayOrder: integer("display_order").default(0),
+    story: text("story"),
+    imageUrl: text("image_url"),
+    distanceText: text("distance_text"),
+    durationText: text("duration_text"),
+    highlightDate: date("highlight_date"),
+    sortOrder: integer("sort_order").default(0),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),

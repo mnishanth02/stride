@@ -1,4 +1,13 @@
-import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import {
+  date,
+  index,
+  integer,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core"
 import { users } from "./users"
 
 export const personalRecords = pgTable(
@@ -8,11 +17,11 @@ export const personalRecords = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id),
-    category: text("category").notNull(),
-    value: text("value").notNull(),
-    unit: text("unit").notNull(),
-    achievedAt: timestamp("achieved_at", { withTimezone: true, mode: "date" }),
-    notes: text("notes"),
+    distanceLabel: text("distance_label").notNull(),
+    distanceKm: numeric("distance_km", { precision: 10, scale: 2 }),
+    timeSeconds: integer("time_seconds").notNull(),
+    timeDisplay: text("time_display").notNull(),
+    achievedAt: date("achieved_at"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
