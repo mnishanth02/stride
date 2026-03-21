@@ -1,6 +1,6 @@
 ---
 goal: Module 0 — Workspace & Infrastructure Setup
-version: 1.1
+version: 1.2
 date_created: 2026-03-21
 last_updated: 2026-03-21
 owner: ZealerProfile
@@ -13,9 +13,11 @@ Transform the existing Turborepo scaffold (Next.js 16 + Tailwind v4 + shadcn/ui)
 
 This document is the **canonical implementation specification** for Module 0 and supersedes earlier recommendations that were based on provisional assumptions. It incorporates the current workspace state plus updated guidance from the official documentation for Next.js 16, Clerk Core 3, Tailwind CSS v4, Drizzle + Neon, and PostHog as reviewed on **2026-03-21**.
 
-**Current state:** Working monorepo with Next.js 16.1.6, React 19.2.4, Tailwind v4.1.18, shadcn/ui using `base-maia` (BaseUI primitives), Phosphor Icons, Biome 2.4.8, `next-themes` dark mode with hotkey toggle, neutral OKLCH theme, incorrect fonts (`Inter` + `Geist_Mono`), no database package, no auth, no storage abstraction, no analytics.
+**Historical baseline (when this plan was authored):** Working monorepo with Next.js 16.1.6, React 19.2.4, Tailwind v4.1.18, shadcn/ui using `base-maia` (BaseUI primitives), Phosphor Icons, Biome 2.4.8, `next-themes` dark mode with hotkey toggle, neutral OKLCH theme, incorrect fonts (`Inter` + `Geist_Mono`), no database package, no auth, no storage abstraction, no analytics.
 
 **Target state:** Brand-themed design system (lime/azure/purple OKLCH tokens, Outfit/Inter/JetBrains Mono fonts, custom shadows/gradients/radius), 2 shared packages (`packages/database/`, `packages/storage/`), Neon database schema + migrations, Clerk auth with `proxy.ts` route protection and webhook user sync, Cloudflare R2 presigned upload abstraction, stable PostHog client instrumentation with consent-gated persistence, and all required environment variables documented and wired. Homepage renders with brand colors and correct fonts. `/dashboard` and `/onboarding` are protected. Clerk webhook events create/update/delete rows in the `users` table.
+
+**Audit status (2026-03-21):** The repository now contains the shared database and storage packages, Clerk integration, webhook and upload API routes, PostHog provider wiring, environment documentation, and the brand token/font updates described by this plan. `pnpm typecheck` and `pnpm build` both pass from the repo root. Module 0 should still be treated as **in closeout**, not complete, until the remaining gaps listed below are resolved and manually verified.
 
 **Final decisions confirmed for this version:**
 
@@ -27,6 +29,29 @@ This document is the **canonical implementation specification** for Module 0 and
 - **Neon runtime queries use pooled `DATABASE_URL`; migrations use `DIRECT_URL`**
 - PostHog setup remains in Module 0, but uses the **stable** `posthog-js` integration path, not pre-release `@posthog/next`
 - The current `base-maia` shadcn/BaseUI setup is retained and updated **in place**; no destructive re-init is part of the baseline plan
+
+## Status Snapshot — 2026-03-21
+
+### Completed in the repository
+
+- Design-system token migration is implemented in `packages/ui/src/styles/globals.css`.
+- Font wiring is implemented in `apps/web/lib/fonts.ts` and `apps/web/app/layout.tsx`.
+- Clerk provider, route protection, webhook route, and auth helper exist in `apps/web/`.
+- Shared `@workspace/database` and `@workspace/storage` packages are present and wired into the web app.
+- Upload signing route, PostHog provider, analytics helpers, `.env.example`, `turbo.json` env tracking, and `docs/impl-plan/vercel-env-vars.md` all exist.
+- Root verification runs completed successfully for `pnpm typecheck` and `pnpm build`.
+
+### Remaining closeout items before Module 0 can be marked complete
+
+- Generate and commit the initial Drizzle migration in `packages/database/drizzle/`; the directory is currently empty.
+- Align the database schema with Product Plan §8.2. The current `users`, `personal_records`, `highlights`, and `achievements` tables do not yet expose the full MVP field set expected by later modules.
+- Add the complete discovery indexing layer: the FTS SQL must cover `full_name`, `username`, `location`, and `tagline`, and the composite public discovery index is still missing.
+- Make `apps/web/lib/analytics.ts` explicitly consent-aware instead of only checking whether PostHog has loaded.
+- Manually verify external-service setup that cannot be proven from source alone: Neon connectivity + migrations, Clerk webhook delivery, Cloudflare R2 bucket/CORS/public URL flow, and Vercel environment/project linkage.
+
+### Readiness note
+
+- Module 1 UI work can begin, but Module 0 should remain in **closeout** status until the items above are finished.
 
 ---
 
@@ -70,7 +95,7 @@ This document is the **canonical implementation specification** for Module 0 and
 - **CON-002**: TypeScript strict mode is mandatory and inherited from `@workspace/typescript-config/base.json`.
 - **CON-003**: Biome 2.4.8 is the only formatter/linter; do not add ESLint or Prettier.
 - **CON-004**: BaseUI primitives must remain the foundation for shadcn components; preserve the existing `base-maia` setup in `packages/ui/components.json`.
-- **CON-005**: Package manager: pnpm 9.15.9. Node >= 20.
+- **CON-005**: Package manager: pnpm 10.32.1. Node >= 20.
 - **CON-006**: All new workspace packages must be ESM (`"type": "module"`).
 - **CON-007**: Turbo UI mode remains `tui`; all tasks must work inside the Turborepo pipeline.
 - **CON-008**: Next.js 16 file convention uses `proxy.ts`; do not introduce new `middleware.ts` files for this module.

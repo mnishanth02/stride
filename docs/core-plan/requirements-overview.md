@@ -1,6 +1,6 @@
 ---
 goal: ZealerProfile MVP — High-Level Requirements & Build Sequence
-version: 1.0
+version: 1.1
 date_created: 2026-03-21
 last_updated: 2026-03-21
 owner: ZealerProfile
@@ -29,7 +29,7 @@ All decisions that affect implementation, consolidated from both source document
 | 1 | Framework | Next.js 16 + Tailwind CSS v4 (`@theme` directive, CSS-first) + shadcn/ui |
 | 2 | Auth | Clerk — email + Google OAuth, built-in email verification, password reset |
 | 3 | Database | Neon Serverless PostgreSQL + Drizzle ORM |
-| 4 | File Storage | **Cloudflare R2 + next-s3-upload** — R2 for storage (10GB free, zero egress, usage-based at $0.015/GB-month). `next-s3-upload` (open source) for upload DX: presigned URL uploads direct from browser → R2, `usePresignedUpload()` hook, 1-line API route. **Abstracted behind a `lib/storage/` service layer** so the provider can be swapped to any S3-compatible service without touching feature code. |
+| 4 | File Storage | **Cloudflare R2 + AWS SDK v3 presigned uploads** — R2 remains the storage provider, but the implementation is abstracted behind the shared `packages/storage` service layer instead of `next-s3-upload`. Browser uploads still go direct to R2 via presigned URLs, and feature code never talks to S3/R2 directly. |
 | 5 | Card generation | next/og (Satori) — server-side PNG via ImageResponse API |
 | 6 | Hosting | Vercel — production + preview environments, Neon database branching |
 | 7 | Analytics | PostHog (free tier) — client-side, consent-gated |
@@ -38,7 +38,7 @@ All decisions that affect implementation, consolidated from both source document
 | 10 | Forms | react-hook-form + Zod v4 + @hookform/resolvers |
 | 11 | Input masking | @maskito/core + @maskito/react (time inputs) |
 | 12 | Fonts | Outfit (display), Inter (body), JetBrains Mono (mono) via next/font/google |
-| 13 | Webhooks | svix for Clerk webhook signature verification |
+| 13 | Webhooks | Clerk `verifyWebhook()` with `CLERK_WEBHOOK_SIGNING_SECRET` for signature verification |
 | 14 | Data fetching | @tanstack/react-query (client-side caching) |
 | 15 | Dark mode | next-themes (attribute="class", defaultTheme="system") from Day 1 |
 | 16 | Design approach | Mobile-first — target viewports: 375px, 390px, 414px |
@@ -50,7 +50,7 @@ All decisions that affect implementation, consolidated from both source document
 
 Modules must be built in this order. Dependencies are explicit — no module should start until its predecessors are complete.
 
-```
+```text
 Module 0: Workspace & Infrastructure Setup
     ↓
 Module 1: App Shell & Shared UI
@@ -68,17 +68,24 @@ Module 6: Shareable Athlete Card    Module 7: Search & Explore
 Module 8: Landing Page, Legal & Launch Polish
 ```
 
-| Module | Depends On | Can Parallel With |
-|--------|-----------|-------------------|
-| 0 — Workspace Setup | — | — |
-| 1 — App Shell & Shared UI | Module 0 | — |
-| 2 — Auth & User Management | Module 1 | — |
-| 3 — Onboarding Flow | Module 2 | — |
-| 4 — Profile Dashboard | Module 3 | — |
-| 5 — Public Profile Page | Module 4 | — |
-| 6 — Shareable Athlete Card | Module 5 | Module 7 |
-| 7 — Search & Explore | Module 5 | Module 6 |
-| 8 — Landing, Legal & Polish | Module 5 | Module 6, Module 7 (landing page & legal pages can start as soon as Module 5 is done) |
+| Module | Depends On | Can Parallel With | Current Status |
+|--------|------------|-------------------|----------------|
+| 0 — Workspace Setup | — | — | In closeout — core infra is implemented, but a few completion items remain |
+| 1 — App Shell & Shared UI | Module 0 | — | Not started |
+| 2 — Auth & User Management | Module 1 | — | Not started |
+| 3 — Onboarding Flow | Module 2 | — | Not started |
+| 4 — Profile Dashboard | Module 3 | — | Not started |
+| 5 — Public Profile Page | Module 4 | — | Not started |
+| 6 — Shareable Athlete Card | Module 5 | Module 7 | Not started |
+| 7 — Search & Explore | Module 5 | Module 6 | Not started |
+| 8 — Landing, Legal & Polish | Module 5 | Module 6, Module 7 (landing page & legal pages can start as soon as Module 5 is done) | Not started |
+
+## Current Delivery Status
+
+- **Module 0** is **mostly implemented but not formally complete**.
+- `pnpm typecheck` and `pnpm build` pass from the repo root.
+- The detailed closeout list lives in `docs/impl-plan/infrastructure-module-0-workspace-setup-1.md`.
+- Recommendation: treat Module 0 as **in closeout** while finishing the remaining schema, migration, indexing, consent, and external-service verification work.
 
 ---
 
@@ -86,21 +93,41 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** A fully configured, deployable project skeleton with all infrastructure connected — before any feature code is written.
 
-### What Gets Built
+### Module 0 Scope
 
 - **Project scaffold** — Next.js 16 app with Tailwind CSS v4, shadcn/ui initialized, TypeScript strict mode
 - **Folder structure & conventions** — Establish the app directory layout, shared `lib/` modules, component organization, naming conventions
 - **Design system foundation** — Tailwind `@theme` tokens (OKLCH color scales for lime, azure, purple), CSS custom properties for shadcn/ui variables (light + dark), font loading via `next/font/google` (Outfit, Inter, JetBrains Mono), border radius scale, shadow/elevation tokens, gradient custom properties
 - **Dark mode** — `next-themes` provider configured with `attribute="class"`, `defaultTheme="system"`, no FOUC
 - **Database** — Neon PostgreSQL project, Drizzle ORM config, full schema for all 4 tables (`users`, `personal_records`, `highlights`, `achievements`), all indexes (unique, full-text search, composite), initial migration
-- **Auth provider** — Clerk project, Next.js middleware for route protection (`/dashboard/*`, `/onboarding/*`), webhook endpoint for user sync (Clerk events → `users` table)
-- **File storage** — Cloudflare R2 bucket configured with CORS, `next-s3-upload` API route for presigned URL generation, upload routes for avatars, highlights, and achievement badges. Browser uploads go directly to R2 via presigned URLs (no server relay). **Storage service abstraction layer** — all file operations (upload, delete, get URL) go through a `lib/storage/` module that wraps `next-s3-upload` + R2. Feature code never calls R2/S3 APIs directly, making future provider swaps a single-module change.
+- **Auth provider** — Clerk project, `apps/web/proxy.ts` route protection for `/dashboard/*` and `/onboarding/*`, webhook endpoint for user sync (Clerk events → `users` table)
+- **File storage** — Cloudflare R2 bucket configured with CORS, upload signing via the shared `packages/storage/` abstraction and AWS SDK v3 presigned URLs. Browser uploads go directly to R2 (no server relay). Feature code never calls R2/S3 APIs directly, making future provider swaps a single-module change.
 - **Analytics** — PostHog initialization, identify calls on auth
 - **Deployment pipeline** — Vercel project linked, production + preview environments, Neon database branching for previews
 - **Environment variables** — All secrets and config keys documented and set in Vercel + local `.env.local`
 - **Utility modules** — `cn()` function (clsx + tailwind-merge), reserved username list
 
-### Key References
+### Module 0 Status — Audited 2026-03-21
+
+**Implemented in repo**
+
+- Workspace scaffold, shared package wiring, brand theme tokens, font loading, and dark mode are in place.
+- Clerk provider, `proxy.ts`, webhook route, upload signing route, PostHog provider, auth helper, and env docs are present.
+- Root validation runs currently passing: `pnpm typecheck`, `pnpm build`.
+
+**Still pending before Module 0 can be called complete**
+
+- Generate and commit the initial Drizzle migration in `packages/database/drizzle/`.
+- Align the current database schema with Product Plan §8.2. The current `users` table still lacks several required profile/discovery fields (`tagline`, `athlete_types`, `story`, `location`, `total_km`, `longest_run_km`, `years_active_since`, `fav_run_time`, `running_personality`, `is_public`), and the child tables still use placeholder field shapes that do not match the MVP spec.
+- Add the full discovery indexing set: the FTS SQL should cover `full_name`, `username`, `location`, and `tagline`, and the composite public discovery index is still missing.
+- Make `apps/web/lib/analytics.ts` explicitly consent-aware.
+- Manually verify the external integration steps that source control cannot prove: Neon migration/runtime connectivity, Clerk webhook delivery, R2 bucket + public asset flow, and Vercel env/project linkage.
+
+**Move-to-Module-1 note**
+
+- Module 1 can start if you want to begin the UI layer, but Module 0 should remain in **closeout** status until the pending items above are resolved.
+
+### Module 0 References
 
 | Source | Sections |
 |--------|----------|
@@ -113,7 +140,7 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** The complete reusable UI layer that every feature builds on — all components styled per design system, animation foundation wired, global layout in place.
 
-### What Gets Built
+### Module 1 Scope
 
 - **Root layout** — Global metadata, font CSS variable classes on `<html>`, theme provider, analytics provider, toast provider
 - **Navbar** — Logo (Outfit 700, lime-500), global search input (placeholder — functional wiring in Module 7), auth-aware buttons (sign in/sign up vs. user menu), dark mode toggle (Sun/Moon icons), mobile hamburger menu
@@ -130,7 +157,7 @@ Module 8: Landing Page, Legal & Launch Polish
 - **Not-found page** — Styled 404 page (`not-found.tsx`)
 - **Icon mapping** — Centralized `icons.ts` module with all Phosphor icon imports per design system §10
 
-### Key References
+### Module 1 References
 
 | Source | Sections |
 |--------|----------|
@@ -143,17 +170,17 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** Users can sign up, sign in, and have their account synced to the database. Auth-protected routes are locked down. Unverified users are gated from public visibility.
 
-### What Gets Built
+### Module 2 Scope
 
 - **Clerk sign-up page** (`/sign-up`) — Email + Google OAuth, branded with ZealerProfile styling
 - **Clerk sign-in page** (`/sign-in`) — Email + Google OAuth
-- **Middleware** — Clerk middleware protecting `/dashboard/*` and `/onboarding/*` routes; all other routes public
-- **Webhook handler** — Clerk `user.created`, `user.updated`, `user.deleted` events → create/update `users` table record. Sync `clerk_id`, `primary_email`, `email_verified`, `full_name`. Webhook signature verified via svix.
+- **Proxy protection** — Clerk route protection for `/dashboard/*` and `/onboarding/*`; all other routes public
+- **Webhook handler** — Clerk `user.created`, `user.updated`, `user.deleted` events → create/update `users` table record. Sync `clerk_id`, `primary_email`, `email_verified`, `full_name`. Webhook signature verified via Clerk `verifyWebhook()`.
 - **Email verification gate** — Profile stays hidden from public (`/:username`, `/explore`, search) until `email_verified = true`. Clerk handles the verification flow; webhook updates the flag.
 - **Reserved username utility** — Blocked list: `admin`, `dashboard`, `api`, `login`, `signup`, `settings`, `support`, `help`, `about`, `onboarding`, `card`, `terms`, `privacy`. Used during onboarding and username change.
 - **Auth state access** — Server-side and client-side patterns for accessing current user
 
-### Key References
+### Module 2 References
 
 | Source | Sections |
 |--------|----------|
@@ -166,7 +193,7 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** A new user completes a 3-step wizard and has a shareable profile with PRs and highlights — in under 5 minutes.
 
-### What Gets Built
+### Module 3 Scope
 
 - **3-step wizard** (`/onboarding`) — Step indicator (progress bar or step dots), forward/back navigation, step state persistence
 - **Step 1/3 — Profile Basics:**
@@ -185,7 +212,7 @@ Module 8: Landing Page, Legal & Launch Polish
 - **Image upload pipeline** — Client-side Canvas API compression (target ≤1MB, max input 5MB), format validation (JPEG/PNG/WebP), upload via storage service layer → URL saved to DB
 - **Onboarding redirect logic** — If onboarding incomplete, redirect from `/dashboard` to `/onboarding`
 
-### Key References
+### Module 3 References
 
 | Source | Sections |
 |--------|----------|
@@ -198,7 +225,7 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** Authenticated users can edit every section of their profile from a single dashboard, manage visibility, and preview their public page.
 
-### What Gets Built
+### Module 4 Scope
 
 - **Dashboard home** (`/dashboard`) — All profile sections editable from one page, organized as collapsible/tabbed sections
 - **Profile basics editing** — Same fields as onboarding Step 1, pre-filled from DB
@@ -211,7 +238,7 @@ Module 8: Landing Page, Legal & Launch Polish
 - **Copy URL button** — One-click copy of `ZealerProfile.app/{username}` to clipboard
 - **Empty states** — Placeholder prompts per section: "Add your first PR!", "Share your proudest moment!", etc. with contextual add buttons
 
-### Key References
+### Module 4 References
 
 | Source | Sections |
 |--------|----------|
@@ -224,7 +251,7 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** A beautiful, SEO-optimized public page at `/:username` that showcases the athlete's full identity — the core product surface.
 
-### What Gets Built
+### Module 5 Scope
 
 - **Public profile route** (`/:username`) — Server-rendered, mobile-first, full layout with all sections
 - **Profile sections rendered:**
@@ -240,7 +267,7 @@ Module 8: Landing Page, Legal & Launch Polish
 - **Empty section handling** — Sections with no data are hidden on public view (no empty-state prompts for visitors)
 - **Responsive layout** — Mobile-first, tested at 375px, 390px, 414px breakpoints
 
-### Key References
+### Module 5 References
 
 | Source | Sections |
 |--------|----------|
@@ -253,7 +280,7 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** Users can generate and download a stunning athlete card in two formats — the #1 growth driver of the product.
 
-### What Gets Built
+### Module 6 Scope
 
 - **Card generator API** — next/og (Satori) route handler generating server-side PNG from latest saved profile data
 - **Two formats:**
@@ -266,7 +293,7 @@ Module 8: Landing Page, Legal & Launch Polish
 - **Download mechanism** — Generate on-demand from current profile data, serve as `Content-Disposition: attachment` with filename `zealerprofile-{username}-{format}.png`
 - **Rate limiting** — 10 card generations per hour per user. Show remaining count in UI.
 
-### Key References
+### Module 6 References
 
 | Source | Sections |
 |--------|----------|
@@ -279,7 +306,7 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** Anyone (including logged-out visitors) can discover and browse public athlete profiles through a directory and search.
 
-### What Gets Built
+### Module 7 Scope
 
 - **Explore page** (`/explore`) — Public, no auth required, SEO-indexed
   - Responsive card grid (portfolio gallery style)
@@ -300,7 +327,7 @@ Module 8: Landing Page, Legal & Launch Polish
   - Returns only public, verified, non-deleted profiles (`is_public = true`, `email_verified = true`, `is_deleted = false`)
 - **Privacy enforcement** — Hidden, unverified, or deleted profiles never appear in explore or search results
 
-### Key References
+### Module 7 References
 
 | Source | Sections |
 |--------|----------|
@@ -313,7 +340,7 @@ Module 8: Landing Page, Legal & Launch Polish
 
 **Goal:** Everything needed to ship a complete, production-ready product — first impression, legal compliance, account management, analytics, and quality assurance.
 
-### What Gets Built
+### Module 8 Scope
 
 - **Landing page** (`/`) — Hero section with gradient, value proposition, tagline, example athlete card (demo account or static mockup), "Create My Profile" CTA. Mobile-first.
 - **Legal pages:**
@@ -336,7 +363,7 @@ Module 8: Landing Page, Legal & Launch Polish
 - **404 handling** — Clean not-found page for invalid usernames, non-existent routes
 - **Production deployment** — Vercel custom domain (`ZealerProfile.app`), all environment variables configured, DNS verified
 
-### Key References
+### Module 8 References
 
 | Source | Sections |
 |--------|----------|
@@ -396,7 +423,7 @@ These features are explicitly excluded from the MVP. Documented here to prevent 
 
 ## How to Use This Document
 
-1. **Start with Module 0.** Create a detailed implementation plan at `docs/impl-plan/module-0-workspace-setup.md` with file paths, exact commands, configuration code, and atomic tasks.
+1. **Start with Module 0.** Use the detailed implementation plan at `docs/impl-plan/infrastructure-module-0-workspace-setup-1.md` and keep its status snapshot updated as closeout work lands.
 2. **Complete each module sequentially** (respecting the dependency map). Mark module as done only when its features are deployed and verified.
 3. **Modules 6 & 7 can be built in parallel** after Module 5 is done.
 4. **Module 8** has components that can start as soon as Module 5 is done (landing page, legal pages don't depend on card or search).
