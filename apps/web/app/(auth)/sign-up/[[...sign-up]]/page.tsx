@@ -98,12 +98,19 @@ export default function SignUpPage() {
     }
   }
 
-  function handleGoogleOAuth() {
-    signUp.sso({
-      strategy: "oauth_google",
-      redirectCallbackUrl: "/sso-callback",
-      redirectUrl: "/sign-up/tasks",
-    })
+  async function handleGoogleOAuth() {
+    setGlobalError(null)
+    try {
+      await signUp.sso({
+        strategy: "oauth_google",
+        redirectCallbackUrl: "/sso-callback",
+        redirectUrl: "/sign-up/tasks",
+      })
+    } catch (err) {
+      if (err instanceof Error && !("clerkError" in err)) {
+        setGlobalError(err.message)
+      }
+    }
   }
 
   return (
@@ -264,7 +271,16 @@ export default function SignUpPage() {
               <button
                 type="button"
                 className="text-muted-foreground text-sm underline-offset-4 hover:text-foreground hover:underline"
-                onClick={() => signUp.verifications.sendEmailCode()}
+                onClick={async () => {
+                  setGlobalError(null)
+                  try {
+                    await signUp.verifications.sendEmailCode()
+                  } catch (err) {
+                    if (err instanceof Error && !("clerkError" in err)) {
+                      setGlobalError(err.message)
+                    }
+                  }
+                }}
                 disabled={isFetching}
               >
                 Didn&apos;t receive a code? Resend

@@ -140,15 +140,24 @@ export default function SignInPage() {
     setGlobalError(null)
   }
 
-  function handleGoogleSignIn() {
-    signIn.sso({
-      strategy: "oauth_google",
-      redirectCallbackUrl: "/sso-callback",
-      redirectUrl: "/sign-in/tasks",
-    })
+  async function handleGoogleSignIn() {
+    setGlobalError(null)
+    try {
+      await signIn.sso({
+        strategy: "oauth_google",
+        redirectCallbackUrl: "/sso-callback",
+        redirectUrl: "/sign-in/tasks",
+      })
+    } catch (err) {
+      if (err instanceof Error && !("clerkError" in err)) {
+        setGlobalError(err.message)
+      }
+    }
   }
 
   if (step === "needs_second_factor") {
+    // MVP: TOTP/MFA UI is not implemented (ASSUMPTION-002).
+    // Show informative message with recovery path instead of a dead end.
     return (
       <Card>
         <CardHeader className="space-y-1 text-center">
@@ -156,12 +165,24 @@ export default function SignInPage() {
             Two-Factor Authentication
           </CardTitle>
           <CardDescription>
-            Two-factor authentication is required. Please contact support.
+            Your account requires two-factor authentication, which is not yet
+            supported. Please contact support or try signing in with Google.
           </CardDescription>
         </CardHeader>
-        <CardFooter className="flex justify-center">
+        <CardContent>
+          {globalError && (
+            <div className="rounded-md bg-destructive/10 px-3 py-2 text-destructive text-sm">
+              {globalError}
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex flex-wrap justify-center gap-3">
+          <Button variant="outline" onClick={handleGoogleSignIn}>
+            <Icons.google className="mr-2 h-4 w-4" />
+            Sign in with Google
+          </Button>
           <Button variant="ghost" onClick={handleStartOver}>
-            Back to sign in
+            Start over
           </Button>
         </CardFooter>
       </Card>
