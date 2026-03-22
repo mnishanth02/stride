@@ -60,7 +60,7 @@ interface PersonalRecordsStepProps {
 
 function getInitialValues(
   records?: PersonalRecordsStepProps["defaultValues"]
-): RecordsFormValues {
+): { values: RecordsFormValues; droppedCustomCount: number } {
   const values: RecordsFormValues = {
     fiveK: "",
     tenK: "",
@@ -69,8 +69,9 @@ function getInitialValues(
     customLabel: "",
     customTime: "",
   }
+  let droppedCustomCount = 0
 
-  if (!records?.records) return values
+  if (!records?.records) return { values, droppedCustomCount }
 
   for (const record of records.records) {
     const idx = STANDARD_DISTANCES.findIndex(
@@ -82,10 +83,12 @@ function getInitialValues(
     } else if (!values.customLabel) {
       values.customLabel = record.distanceLabel
       values.customTime = record.timeDisplay
+    } else {
+      droppedCustomCount++
     }
   }
 
-  return values
+  return { values, droppedCustomCount }
 }
 
 export function PersonalRecordsStep({
@@ -98,7 +101,7 @@ export function PersonalRecordsStep({
   const customLabelId = useId()
   const customTimeId = useId()
 
-  const initialValues = getInitialValues(defaultValues)
+  const { values: initialValues, droppedCustomCount } = getInitialValues(defaultValues)
 
   // Show custom section if there are pre-existing custom values
   useEffect(() => {
@@ -106,6 +109,15 @@ export function PersonalRecordsStep({
       setShowCustom(true)
     }
   }, [initialValues.customLabel, initialValues.customTime])
+
+  useEffect(() => {
+    if (droppedCustomCount > 0) {
+      toast.warning(
+        `${droppedCustomCount} additional custom record${droppedCustomCount > 1 ? "s were" : " was"} saved previously but can't be displayed here. Re-saving will only keep the records shown.`,
+        { duration: 8000 }
+      )
+    }
+  }, [droppedCustomCount])
 
   const form = useForm<RecordsFormValues>({
     resolver: zodResolver(formSchema),

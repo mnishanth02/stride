@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Skeleton,
   SkeletonHeading,
@@ -13,6 +13,8 @@ import {
 } from "@workspace/ui/lib/animations"
 import { AnimatePresence, motion } from "motion/react"
 import { useRouter } from "next/navigation"
+import { Button } from "@workspace/ui/components/button"
+import { Icons } from "@workspace/ui/lib/icons"
 import { Suspense, useEffect, useRef } from "react"
 
 import { StepIndicator } from "@/components/onboarding/step-indicator"
@@ -41,7 +43,9 @@ function OnboardingWizard() {
   const shouldReduceMotion = useReducedMotion()
   const variants = shouldReduceMotion ? fadeInVariants : slideUpVariants
 
-  const { data: progress, isLoading } = useQuery({
+  const queryClient = useQueryClient()
+
+  const { data: progress, isLoading, isError, refetch } = useQuery({
     queryKey: ["onboarding-progress"],
     queryFn: async () => {
       const res = await fetch("/api/onboarding/progress")
@@ -81,6 +85,20 @@ function OnboardingWizard() {
     return <OnboardingLoading />
   }
 
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-12 text-center">
+        <Icons.warning className="size-8 text-destructive" />
+        <p className="text-muted-foreground">
+          Failed to load your progress. Please try again.
+        </p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <>
       <StepIndicator currentStep={currentStep} />
@@ -117,7 +135,10 @@ function OnboardingWizard() {
                     }
                   : undefined
               }
-              onComplete={nextStep}
+              onComplete={() => {
+                queryClient.invalidateQueries({ queryKey: ["onboarding-progress"] })
+                nextStep()
+              }}
             />
           )}
           {currentStep === 2 && (
@@ -139,7 +160,10 @@ function OnboardingWizard() {
                   tagline: progress?.user?.tagline ?? "",
                 },
               }}
-              onComplete={nextStep}
+              onComplete={() => {
+                queryClient.invalidateQueries({ queryKey: ["onboarding-progress"] })
+                nextStep()
+              }}
               onBack={prevStep}
             />
           )}

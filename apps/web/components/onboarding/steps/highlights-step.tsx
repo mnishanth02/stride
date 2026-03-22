@@ -221,7 +221,7 @@ export function HighlightsStep({
           sortOrder: i,
         }))
 
-        const res = await fetch("/api/onboarding/highlights", {
+        const res = await fetch("/api/onboarding/highlights?complete=true", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ highlights: payload }),
@@ -232,16 +232,6 @@ export function HighlightsStep({
           toast.error(
             body?.error ?? "Failed to save highlights. Please try again."
           )
-          return
-        }
-
-        // Complete onboarding
-        const completeRes = await fetch("/api/onboarding/complete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        })
-        if (!completeRes.ok) {
-          toast.error("Something went wrong. Please try again.")
           return
         }
 

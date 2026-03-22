@@ -7,15 +7,18 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 
 const recordsSchema = z.object({
-  records: z.array(
-    z.object({
-      distanceLabel: z.string().min(1),
-      distanceKm: z.number().optional(),
-      timeSeconds: z.number().int().positive(),
-      timeDisplay: z.string().min(1),
-      achievedAt: z.string().optional(),
-    })
-  ),
+  records: z
+    .array(
+      z.object({
+        distanceLabel: z.string().min(1),
+        distanceKm: z.number().optional(),
+        timeSeconds: z.number().int().positive(),
+        timeDisplay: z.string().min(1),
+        achievedAt: z.string().optional(),
+      })
+    )
+    .min(1, "At least one personal record is required")
+    .max(20, "Too many records"),
 })
 
 const MAX_SECONDS_PER_DAY = 86400

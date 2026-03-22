@@ -95,6 +95,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, user: updated })
   } catch (error) {
+    // Handle unique constraint violation (concurrent username claim)
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as { code: string }).code === "23505"
+    ) {
+      return NextResponse.json(
+        {
+          error: "Username is already taken",
+          fieldErrors: { username: ["This username is already taken"] },
+        },
+        { status: 409 }
+      )
+    }
     console.error("Profile save failed:", error)
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },

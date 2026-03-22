@@ -34,6 +34,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const url = new URL(request.url)
+    const shouldComplete = url.searchParams.get("complete") === "true"
+
     const body = await request.json()
     const result = highlightsSchema.safeParse(body)
 
@@ -64,7 +67,16 @@ export async function POST(request: Request) {
         index: number
       ) => {
         if (h.highlightDate) {
-          const date = new Date(h.highlightDate)
+          // Validate YYYY-MM-DD format
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(h.highlightDate)) {
+            errors.push(`Highlight ${index + 1}: date must be in YYYY-MM-DD format`)
+            return
+          }
+          const date = new Date(`${h.highlightDate}T00:00:00`)
+          if (Number.isNaN(date.getTime())) {
+            errors.push(`Highlight ${index + 1}: invalid date`)
+            return
+          }
           if (date > now) {
             errors.push(`Highlight ${index + 1}: date cannot be in the future`)
           }
@@ -100,11 +112,18 @@ export async function POST(request: Request) {
       if (validHighlights.length > 0) {
         await tx.insert(highlights).values(validHighlights)
       }
+      if (shouldComplete) {
+        await tx
+          .update(users)
+          .set({ onboardingCompleted: true, updatedAt: new Date() })
+          .where(eq(users.id, user.id))
+      }
     })
 
     return NextResponse.json({
       success: true,
       count: validHighlights.length,
+      completed: shouldComplete,
     })
   } catch (error) {
     console.error("Highlights save failed:", error)

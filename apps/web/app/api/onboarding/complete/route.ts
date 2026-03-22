@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@workspace/database/client"
-import { users } from "@workspace/database/schema"
+import { personalRecords, users } from "@workspace/database/schema"
 import { eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
 
@@ -33,6 +33,22 @@ export async function POST(_request: Request) {
         {
           error: "Profile is incomplete. Please complete Step 1 first.",
           missingFields,
+        },
+        { status: 400 }
+      )
+    }
+
+    // Validate Step 2 — at least one personal record exists
+    const userRecords = await db.query.personalRecords.findMany({
+      where: eq(personalRecords.userId, user.id),
+      columns: { id: true },
+    })
+
+    if (userRecords.length === 0) {
+      return NextResponse.json(
+        {
+          error: "Please complete Step 2 — add at least one personal record.",
+          missingStep: 2,
         },
         { status: 400 }
       )

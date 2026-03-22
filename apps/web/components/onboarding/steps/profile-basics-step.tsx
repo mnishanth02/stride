@@ -105,7 +105,7 @@ export function ProfileBasicsStep({
   })
 
   const watchedUsername = form.watch("username")
-  const { isAvailable, isChecking, reason } = useUsernameCheck(
+  const { isAvailable, isChecking, reason, isError } = useUsernameCheck(
     watchedUsername,
     defaultValues?.username
   )
@@ -149,6 +149,13 @@ export function ProfileBasicsStep({
         return
       }
       if (isAvailable === null) {
+        if (isError) {
+          toast.error("Couldn't verify username availability. Please try again.")
+          form.setError("username", {
+            type: "manual",
+            message: "Username check failed — please try again",
+          })
+        }
         return
       }
       if (isAvailable === false) {
@@ -185,7 +192,7 @@ export function ProfileBasicsStep({
         toast.error("Network error. Please check your connection.")
       }
     },
-    [isAvailable, isChecking, reason, form, onComplete]
+    [isAvailable, isChecking, reason, isError, form, onComplete]
   )
 
   const { errors, isSubmitting } = form.formState
@@ -244,6 +251,14 @@ export function ProfileBasicsStep({
             <>
               <Icons.warning className="size-4 text-destructive" />
               <span className="text-destructive text-sm">{reason}</span>
+            </>
+          )}
+          {!isChecking && isError && isAvailable === null && (
+            <>
+              <Icons.warning className="size-4 text-destructive" />
+              <span className="text-destructive text-sm">
+                Couldn't check availability
+              </span>
             </>
           )}
         </div>

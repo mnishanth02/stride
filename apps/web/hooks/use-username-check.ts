@@ -7,6 +7,7 @@ interface UsernameCheckResult {
   isAvailable: boolean | null
   isChecking: boolean
   reason: string | null
+  isError: boolean
 }
 
 export function useUsernameCheck(
@@ -33,7 +34,7 @@ export function useUsernameCheck(
     !!debouncedUsername &&
     debouncedUsername === currentUsername.toLowerCase()
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError } = useQuery({
     queryKey: ["username-check", debouncedUsername],
     queryFn: async () => {
       const res = await fetch(
@@ -50,15 +51,15 @@ export function useUsernameCheck(
   })
 
   if (isOwnUsername) {
-    return { isAvailable: true, isChecking: false, reason: null }
+    return { isAvailable: true, isChecking: false, reason: null, isError: false }
   }
 
   if (!debouncedUsername || debouncedUsername.length < 3) {
-    return { isAvailable: null, isChecking: false, reason: null }
+    return { isAvailable: null, isChecking: false, reason: null, isError: false }
   }
 
   if (isLoading || isFetching) {
-    return { isAvailable: null, isChecking: true, reason: null }
+    return { isAvailable: null, isChecking: true, reason: null, isError: false }
   }
 
   if (data) {
@@ -68,8 +69,9 @@ export function useUsernameCheck(
       reason: data.available
         ? null
         : (data.reason ?? "Username is not available"),
+      isError: false,
     }
   }
 
-  return { isAvailable: null, isChecking: false, reason: null }
+  return { isAvailable: null, isChecking: false, reason: null, isError }
 }
