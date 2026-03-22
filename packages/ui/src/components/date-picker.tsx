@@ -17,6 +17,7 @@ interface DatePickerProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  maxDate?: Date
 }
 
 function DatePicker({
@@ -25,6 +26,7 @@ function DatePicker({
   placeholder = "Pick a date",
   disabled,
   className,
+  maxDate,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -50,6 +52,7 @@ function DatePicker({
           mode="single"
           selected={value}
           onSelect={handleSelect}
+          disabled={maxDate ? { after: maxDate } : undefined}
           className="p-3"
         />
         {value && (

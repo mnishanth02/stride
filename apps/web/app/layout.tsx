@@ -5,7 +5,6 @@ import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import type { Metadata } from "next"
 import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
-import { Navbar } from "@/components/navbar"
 import { PostHogProvider } from "@/components/posthog-provider"
 import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -62,8 +61,7 @@ export default function RootLayout({
               <TooltipProvider delay={300}>
                 <PostHogProvider>
                   <Toaster />
-                  <Navbar />
-                  <main className="flex-1">{children}</main>
+                  {children}
                 </PostHogProvider>
               </TooltipProvider>
             </ThemeProvider>
