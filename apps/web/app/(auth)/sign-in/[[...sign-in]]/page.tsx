@@ -18,6 +18,7 @@ import { emailSchema, passwordSchema } from "@workspace/ui/lib/validations"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 
 type Step = "credentials" | "needs_client_trust" | "needs_second_factor"
 
@@ -126,6 +127,7 @@ export default function SignInPage() {
 
     try {
       await signIn.mfa.sendEmailCode()
+      toast.success("Verification code resent")
     } catch (err) {
       if (err instanceof Error && !("clerkError" in err)) {
         setGlobalError(err.message)
@@ -317,12 +319,14 @@ export default function SignInPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <span
-                className="cursor-default text-muted-foreground text-xs"
+              <button
+                type="button"
+                disabled
+                className="cursor-not-allowed text-muted-foreground text-xs opacity-60"
                 title="Coming soon"
               >
                 Forgot password?
-              </span>
+              </button>
             </div>
             <div className="relative">
               <Input

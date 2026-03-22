@@ -22,9 +22,11 @@ export default async function DashboardLayout({
     redirect("/onboarding")
   }
 
-  if (!user.onboardingCompleted) {
-    redirect("/onboarding")
-  }
+  // TODO: Re-enable onboarding gate once /onboarding page can set onboardingCompleted = true
+  // Currently disabled because no write path exists, trapping all new users
+  // if (!user.onboardingCompleted) {
+  //   redirect("/onboarding")
+  // }
 
   return <>{children}</>
 }

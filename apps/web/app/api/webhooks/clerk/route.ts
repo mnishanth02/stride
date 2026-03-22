@@ -93,6 +93,9 @@ export async function POST(req: NextRequest) {
 
       case "user.deleted": {
         if (evt.data.id) {
+          // TODO: When building query layer for highlights/personal_records/achievements,
+          // ensure all queries join on users.isDeleted = false, or propagate isDeleted to child tables.
+          // Currently only the user row is soft-deleted — child data remains queryable.
           await db
             .update(users)
             .set({

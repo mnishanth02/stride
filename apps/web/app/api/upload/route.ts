@@ -69,8 +69,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(payload)
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Internal server error"
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error("Upload failed:", error)
+    return NextResponse.json(
+      { error: "Upload failed. Please try again later." },
+      { status: 500 }
+    )
   }
 }

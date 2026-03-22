@@ -1,16 +1,17 @@
 import { z } from "zod"
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-/** Reserved usernames that cannot be claimed */
-export const RESERVED_USERNAMES = [
+/**
+ * Reserved usernames that cannot be claimed by users.
+ * Duplicated from @workspace/database/constants/reserved-usernames intentionally —
+ * packages/ui must NOT depend on packages/database (Node.js-only transitive deps).
+ * Server-side check-username API uses the database copy as the authoritative source.
+ */
+const RESERVED_USERNAMES = new Set([
   "admin",
   "dashboard",
   "api",
   "login",
   "signup",
-  "sign-in",
-  "sign-up",
   "settings",
   "support",
   "help",
@@ -21,7 +22,9 @@ export const RESERVED_USERNAMES = [
   "privacy",
   "explore",
   "search",
-] as const
+  "sign-in",
+  "sign-up",
+])
 
 /** Accepted image MIME types */
 export const ACCEPTED_IMAGE_TYPES = [
@@ -106,8 +109,7 @@ export const usernameSchema = z
     "Username must start and end with a letter or number, and can only contain lowercase letters, numbers, hyphens, and underscores"
   )
   .refine(
-    (val) =>
-      !RESERVED_USERNAMES.includes(val as (typeof RESERVED_USERNAMES)[number]),
+    (val) => !RESERVED_USERNAMES.has(val.toLowerCase()),
     "This username is reserved"
   )
 

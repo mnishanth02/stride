@@ -18,6 +18,7 @@ import { emailSchema, passwordSchema } from "@workspace/ui/lib/validations"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -275,6 +276,7 @@ export default function SignUpPage() {
                   setGlobalError(null)
                   try {
                     await signUp.verifications.sendEmailCode()
+                    toast.success("Verification code resent")
                   } catch (err) {
                     if (err instanceof Error && !("clerkError" in err)) {
                       setGlobalError(err.message)

@@ -6,6 +6,7 @@ import { Separator } from "@workspace/ui/components/separator"
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -48,7 +49,10 @@ function ThemeToggle() {
 
 function SearchPlaceholder({ className }: { className?: string }) {
   return (
-    <div
+    <button
+      type="button"
+      disabled
+      aria-label="Search athletes"
       className={cn(
         "flex h-9 items-center gap-2 rounded-full border border-input bg-muted/50 px-3 text-muted-foreground text-sm",
         className
@@ -56,7 +60,7 @@ function SearchPlaceholder({ className }: { className?: string }) {
     >
       <Icons.search className="size-4 shrink-0" />
       <span>Search athletes…</span>
-    </div>
+    </button>
   )
 }
 
@@ -128,6 +132,9 @@ function Navbar() {
                 <SheetTitle className="font-bold font-heading text-lg">
                   ZealerProfile
                 </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Navigation menu
+                </SheetDescription>
               </SheetHeader>
               <div className="mt-6 flex flex-col gap-4">
                 <SearchPlaceholder />

@@ -1,6 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@workspace/database/client"
-import { isReservedUsername } from "@workspace/database/constants/reserved-usernames"
 import { users } from "@workspace/database/schema"
 import { usernameSchema } from "@workspace/ui/lib/validations"
 import { eq } from "drizzle-orm"
@@ -28,14 +27,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       available: false,
       reason: result.error.issues[0]?.message ?? "Invalid username format",
-    })
-  }
-
-  // Check reserved names
-  if (isReservedUsername(username)) {
-    return NextResponse.json({
-      available: false,
-      reason: "This username is reserved",
     })
   }
 
