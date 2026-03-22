@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.6",
+    "@clerk/ui": "^1.2.3",
     "@hookform/resolvers": "^5.2.2",
+    "@next/env": "16.2.1",
     "@phosphor-icons/react": "^2.1.10",
     "@tanstack/react-query": "^5.80.7",
     "@workspace/database": "workspace:*",

@@ -25,10 +25,16 @@ Prefixed with `NEXT_PUBLIC_` — included in the browser bundle.
 
 | Variable | Description | Required |
 |----------|-------------|----------|
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk frontend publishable key consumed by the browser runtime | ✅ |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | Canonical sign-in route for Clerk client navigation | ✅ |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | Canonical sign-up route for Clerk client navigation | ✅ |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | Redirect after sign-in when no force redirect is set | ✅ |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | Redirect after sign-up when no force redirect is set | ✅ |
+| `NEXT_PUBLIC_CLERK_KEYLESS_DISABLED` | Set to `true` to prevent Clerk's automatic dev-time keyless fallback | Recommended |
+| `NEXT_PUBLIC_POSTHOG_ENABLED` | Set to `true` to enable PostHog analytics; `false` to disable silently | ✅ |
 | `NEXT_PUBLIC_POSTHOG_TOKEN` | PostHog project API key | ✅ |
 | `NEXT_PUBLIC_POSTHOG_HOST` | PostHog ingestion host | ✅ |
 | `NEXT_PUBLIC_APP_URL` | Public app URL (e.g., `https://stride.app`) | ✅ |
-| `CLERK_PUBLISHABLE_KEY` | Clerk frontend publishable key | ✅ |
 
 ## Clerk Redirect Variables
 
@@ -38,6 +44,8 @@ Prefixed with `NEXT_PUBLIC_` — included in the browser bundle.
 | `CLERK_SIGN_UP_URL` | Sign-up page path | `/sign-up` |
 | `CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | Redirect after sign-in | `/dashboard` |
 | `CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | Redirect after sign-up | `/onboarding` |
+
+> For this app, define both the `NEXT_PUBLIC_CLERK_*` route variables and the server-side `CLERK_*` aliases with the same `/sign-in` and `/sign-up` values. The Clerk v7 browser runtime reads the `NEXT_PUBLIC_` variants, while server-side code and documentation in this repo also reference the server aliases.
 
 ## Preview Deployments
 

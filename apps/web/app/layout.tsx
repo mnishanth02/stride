@@ -1,4 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs"
+import { ui } from "@clerk/ui"
 import { Toaster } from "@workspace/ui/components/sonner"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import type { Metadata } from "next"
@@ -44,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider ui={ui}>
       <html
         lang="en"
         suppressHydrationWarning

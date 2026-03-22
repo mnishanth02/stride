@@ -7,11 +7,22 @@ import { useEffect, useRef } from "react"
 
 import { identifyUser, resetAnalytics } from "@/lib/analytics"
 
+const isPostHogEnabled =
+  process.env.NEXT_PUBLIC_POSTHOG_ENABLED === "true" ||
+  process.env.NEXT_PUBLIC_POSTHOG_ENABLED === "1"
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const { user, isSignedIn } = useUser()
   const identifiedRef = useRef<string | null>(null)
 
   useEffect(() => {
+    if (!isPostHogEnabled) {
+      console.warn(
+        "[PostHog] Analytics disabled (NEXT_PUBLIC_POSTHOG_ENABLED is not 'true')"
+      )
+      return
+    }
+
     const token = process.env.NEXT_PUBLIC_POSTHOG_TOKEN
     const host = process.env.NEXT_PUBLIC_POSTHOG_HOST
 
@@ -32,6 +43,8 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
+    if (!isPostHogEnabled) return
+
     if (isSignedIn && user && identifiedRef.current !== user.id) {
       const identified = identifyUser(user.id, {
         email: user.primaryEmailAddress?.emailAddress,
