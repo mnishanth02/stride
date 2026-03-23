@@ -109,11 +109,23 @@ function Navbar() {
           )}
 
           {isLoaded && isSignedIn && (
-            <UserButton
-              appearance={{
-                elements: { avatarBox: "size-8" },
-              }}
-            />
+            <>
+              <Link
+                href="/dashboard"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "hidden sm:inline-flex"
+                )}
+              >
+                <Icons.pace className="mr-1.5 size-4" />
+                Dashboard
+              </Link>
+              <UserButton
+                appearance={{
+                  elements: { avatarBox: "size-8" },
+                }}
+              />
+            </>
           )}
 
           {/* Mobile menu trigger */}
@@ -158,16 +170,26 @@ function Navbar() {
                   </>
                 )}
                 {isLoaded && isSignedIn && (
-                  <div className="flex items-center gap-3 px-2">
-                    <UserButton
-                      appearance={{
-                        elements: { avatarBox: "size-8" },
-                      }}
-                    />
-                    <span className="text-muted-foreground text-sm">
-                      Account
-                    </span>
-                  </div>
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className={buttonVariants({ variant: "ghost" })}
+                      onClick={() => setOpen(false)}
+                    >
+                      <Icons.pace className="mr-2 size-4" />
+                      Dashboard
+                    </Link>
+                    <div className="flex items-center gap-3 px-2">
+                      <UserButton
+                        appearance={{
+                          elements: { avatarBox: "size-8" },
+                        }}
+                      />
+                      <span className="text-muted-foreground text-sm">
+                        Account
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
             </SheetContent>

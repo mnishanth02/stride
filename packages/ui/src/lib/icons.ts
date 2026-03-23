@@ -1,3 +1,5 @@
+"use client"
+
 import { ArrowLeft } from "@phosphor-icons/react/dist/icons/ArrowLeft"
 import { ArrowSquareOut } from "@phosphor-icons/react/dist/icons/ArrowSquareOut"
 import { CalendarBlank } from "@phosphor-icons/react/dist/icons/CalendarBlank"
