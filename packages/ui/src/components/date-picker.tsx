@@ -1,5 +1,7 @@
 "use client"
 
+import "react-day-picker/style.css"
+
 import { Button } from "@workspace/ui/components/button"
 import {
   Popover,

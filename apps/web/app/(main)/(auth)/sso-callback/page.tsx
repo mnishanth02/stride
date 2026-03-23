@@ -23,11 +23,7 @@ export default function SSOCallbackPage() {
 
     async function finalizeSignIn() {
       await signIn.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            router.push("/sign-in/tasks")
-            return
-          }
+        navigate: ({ decorateUrl }) => {
           const url = decorateUrl("/dashboard")
           if (url.startsWith("http")) {
             window.location.href = url
@@ -40,11 +36,7 @@ export default function SSOCallbackPage() {
 
     async function finalizeSignUp() {
       await signUp.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            router.push("/sign-up/tasks")
-            return
-          }
+        navigate: ({ decorateUrl }) => {
           const url = decorateUrl("/onboarding")
           if (url.startsWith("http")) {
             window.location.href = url

@@ -289,6 +289,41 @@
 }
 
 /* ---------------------------------------------------------------------------
+   react-day-picker brand overrides
+   --------------------------------------------------------------------------- */
+
+/* v9 scopes its CSS custom properties to .rdp-root */
+.rdp-root {
+  --rdp-accent-color: var(--lime-500);
+  --rdp-accent-background-color: var(--lime-500);
+  --rdp-today-color: var(--lime-600);
+}
+
+/* v9 single mode only adds a border — force background on selected day */
+.rdp-selected .rdp-day_button {
+  background-color: var(--lime-500);
+  color: oklch(0.208 0.014 265);
+}
+
+/* Today ring */
+.rdp-today:not(.rdp-outside) .rdp-day_button {
+  border-color: var(--lime-300);
+}
+
+/* Hover states (v9 base CSS has none) */
+.rdp-day_button:hover {
+  background-color: var(--lime-50);
+}
+.dark .rdp-day_button:hover {
+  background-color: var(--lime-900);
+}
+
+/* Month caption font */
+.rdp-month_caption {
+  font-family: var(--font-heading);
+}
+
+/* ---------------------------------------------------------------------------
    Base layer
    --------------------------------------------------------------------------- */
 

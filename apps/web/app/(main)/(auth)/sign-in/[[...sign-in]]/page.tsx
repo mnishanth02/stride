@@ -59,11 +59,7 @@ export default function SignInPage() {
 
   async function finalize() {
     await signIn.finalize({
-      navigate: ({ session, decorateUrl }) => {
-        if (session?.currentTask) {
-          router.push("/sign-in/tasks")
-          return
-        }
+      navigate: ({ decorateUrl }) => {
         const url = decorateUrl("/dashboard")
         if (url.startsWith("http")) {
           window.location.href = url
@@ -155,7 +151,7 @@ export default function SignInPage() {
       await signIn.sso({
         strategy: "oauth_google",
         redirectCallbackUrl: "/sso-callback",
-        redirectUrl: "/sign-in/tasks",
+        redirectUrl: "/dashboard",
       })
     } catch (err) {
       if (err instanceof Error && !("clerkError" in err)) {

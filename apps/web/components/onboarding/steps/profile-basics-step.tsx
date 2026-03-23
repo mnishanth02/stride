@@ -10,6 +10,7 @@ import { MultiSelect } from "@workspace/ui/components/multi-select"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -202,9 +203,9 @@ export function ProfileBasicsStep({
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="mx-auto flex w-full max-w-md flex-col gap-6"
+      className="mx-auto flex w-full max-w-2xl flex-col gap-6"
     >
-      {/* Avatar */}
+      {/* Avatar — full-width, centered */}
       <div className="flex justify-center">
         <Controller
           name="avatarUrl"
@@ -221,166 +222,189 @@ export function ProfileBasicsStep({
         />
       </div>
 
-      {/* Full Name */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={fullNameId}>Full Name</Label>
-        <Input id={fullNameId} {...form.register("fullName")} />
-        {errors.fullName && (
-          <p className="mt-1 text-destructive text-sm">
-            {errors.fullName.message}
-          </p>
-        )}
-      </div>
+      {/* 2-column responsive grid */}
+      <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+        {/* Left column: identity fields */}
+        <div className="flex flex-col gap-5">
+          {/* Full Name */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={fullNameId}>Full Name</Label>
+            <Input id={fullNameId} {...form.register("fullName")} />
+            {errors.fullName && (
+              <p className="mt-1 text-destructive text-sm">
+                {errors.fullName.message}
+              </p>
+            )}
+          </div>
 
-      {/* Username */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={usernameId}>Username</Label>
-        <Input id={usernameId} {...form.register("username")} />
-        <div aria-live="polite" className="mt-1 flex items-center gap-1.5">
-          {isChecking && (
-            <>
-              <Icons.loading className="size-4 animate-spin" />
-              <span className="text-muted-foreground text-sm">Checking…</span>
-            </>
-          )}
-          {!isChecking && isAvailable === true && (
-            <>
-              <Icons.checkCircle className="size-4 text-green-600" />
-              <span className="text-green-600 text-sm">Available</span>
-            </>
-          )}
-          {!isChecking && isAvailable === false && (
-            <>
-              <Icons.warning className="size-4 text-destructive" />
-              <span className="text-destructive text-sm">{reason}</span>
-            </>
-          )}
-          {!isChecking && isError && isAvailable === null && (
-            <>
-              <Icons.warning className="size-4 text-destructive" />
-              <span className="text-destructive text-sm">
-                Couldn't check availability
-              </span>
-            </>
-          )}
-        </div>
-        {errors.username && (
-          <p className="mt-1 text-destructive text-sm">
-            {errors.username.message}
-          </p>
-        )}
-      </div>
+          {/* Username */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={usernameId}>Username</Label>
+            <Input id={usernameId} {...form.register("username")} />
+            <div aria-live="polite" className="mt-1 flex items-center gap-1.5">
+              {isChecking && (
+                <>
+                  <Icons.loading className="size-4 animate-spin" />
+                  <span className="text-muted-foreground text-sm">
+                    Checking…
+                  </span>
+                </>
+              )}
+              {!isChecking && isAvailable === true && (
+                <>
+                  <Icons.checkCircle className="size-4 text-green-600" />
+                  <span className="text-green-600 text-sm">Available</span>
+                </>
+              )}
+              {!isChecking && isAvailable === false && (
+                <>
+                  <Icons.warning className="size-4 text-destructive" />
+                  <span className="text-destructive text-sm">{reason}</span>
+                </>
+              )}
+              {!isChecking && isError && isAvailable === null && (
+                <>
+                  <Icons.warning className="size-4 text-destructive" />
+                  <span className="text-destructive text-sm">
+                    Couldn't check availability
+                  </span>
+                </>
+              )}
+            </div>
+            {errors.username && (
+              <p className="mt-1 text-destructive text-sm">
+                {errors.username.message}
+              </p>
+            )}
+          </div>
 
-      {/* Tagline */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={taglineId}>Tagline</Label>
-        <TextareaWithCounter
-          id={taglineId}
-          maxLength={TEXT_LIMITS.tagline.max}
-          {...form.register("tagline")}
-        />
-        {errors.tagline && (
-          <p className="mt-1 text-destructive text-sm">
-            {errors.tagline.message}
-          </p>
-        )}
-      </div>
-
-      {/* Athlete Types */}
-      <div className="flex flex-col gap-1.5">
-        <Label>Athlete Type</Label>
-        <Controller
-          name="athleteTypes"
-          control={form.control}
-          render={({ field }) => (
-            <MultiSelect
-              options={ATHLETE_TYPES.map((t) => ({ label: t, value: t }))}
-              value={field.value}
-              onChange={field.onChange}
-              placeholder="Select athlete types…"
+          {/* Tagline */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={taglineId}>Tagline</Label>
+            <TextareaWithCounter
+              id={taglineId}
+              maxLength={TEXT_LIMITS.tagline.max}
+              {...form.register("tagline")}
             />
-          )}
-        />
-        {errors.athleteTypes && (
-          <p className="mt-1 text-destructive text-sm">
-            {errors.athleteTypes.message}
-          </p>
-        )}
+            {errors.tagline && (
+              <p className="mt-1 text-destructive text-sm">
+                {errors.tagline.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Right column: preference fields */}
+        <div className="flex flex-col gap-5">
+          {/* Athlete Types */}
+          <div className="flex flex-col gap-1.5">
+            <Label>Athlete Type</Label>
+            <Controller
+              name="athleteTypes"
+              control={form.control}
+              render={({ field }) => (
+                <MultiSelect
+                  options={ATHLETE_TYPES.map((t) => ({ label: t, value: t }))}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Select athlete types…"
+                />
+              )}
+            />
+            {errors.athleteTypes && (
+              <p className="mt-1 text-destructive text-sm">
+                {errors.athleteTypes.message}
+              </p>
+            )}
+          </div>
+
+          {/* Location */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={locationId}>
+              Location <span className="text-muted-foreground">(optional)</span>
+            </Label>
+            <Input id={locationId} {...form.register("location")} />
+            {errors.location && (
+              <p className="mt-1 text-destructive text-sm">
+                {errors.location.message}
+              </p>
+            )}
+          </div>
+
+          {/* Fav Run Time */}
+          <div className="flex flex-col gap-1.5">
+            <Label>Favorite Run Time</Label>
+            <Controller
+              name="favRunTime"
+              control={form.control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {FAV_RUN_TIMES.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.favRunTime && (
+              <p className="mt-1 text-destructive text-sm">
+                {errors.favRunTime.message}
+              </p>
+            )}
+          </div>
+
+          {/* Running Personality */}
+          <div className="flex flex-col gap-1.5">
+            <Label>Running Personality</Label>
+            <Controller
+              name="runningPersonality"
+              control={form.control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {RUNNING_PERSONALITIES.map((personality) => (
+                        <SelectItem key={personality} value={personality}>
+                          {personality}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.runningPersonality && (
+              <p className="mt-1 text-destructive text-sm">
+                {errors.runningPersonality.message}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Location */}
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={locationId}>
-          Location <span className="text-muted-foreground">(optional)</span>
-        </Label>
-        <Input id={locationId} {...form.register("location")} />
-        {errors.location && (
-          <p className="mt-1 text-destructive text-sm">
-            {errors.location.message}
-          </p>
-        )}
+      {/* Submit — right-aligned below grid */}
+      <div className="flex justify-end pt-2">
+        <Button
+          type="submit"
+          size="md"
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
+        >
+          Next
+          <Icons.chevronRight data-icon="inline-end" />
+        </Button>
       </div>
-
-      {/* Fav Run Time */}
-      <div className="flex flex-col gap-1.5">
-        <Label>Favorite Run Time</Label>
-        <Controller
-          name="favRunTime"
-          control={form.control}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent>
-                {FAV_RUN_TIMES.map((time) => (
-                  <SelectItem key={time} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.favRunTime && (
-          <p className="mt-1 text-destructive text-sm">
-            {errors.favRunTime.message}
-          </p>
-        )}
-      </div>
-
-      {/* Running Personality */}
-      <div className="flex flex-col gap-1.5">
-        <Label>Running Personality</Label>
-        <Controller
-          name="runningPersonality"
-          control={form.control}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent>
-                {RUNNING_PERSONALITIES.map((personality) => (
-                  <SelectItem key={personality} value={personality}>
-                    {personality}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.runningPersonality && (
-          <p className="mt-1 text-destructive text-sm">
-            {errors.runningPersonality.message}
-          </p>
-        )}
-      </div>
-
-      {/* Submit */}
-      <Button type="submit" isLoading={isSubmitting} disabled={isSubmitting}>
-        Next
-      </Button>
     </form>
   )
 }

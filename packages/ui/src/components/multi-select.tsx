@@ -59,7 +59,7 @@ function MultiSelect({
           aria-haspopup="listbox"
           tabIndex={disabled ? -1 : 0}
           className={cn(
-            "flex min-h-9 w-full flex-wrap items-center gap-1 rounded-sm border border-input bg-transparent px-3 py-1.5 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+            "flex min-h-9 w-full flex-wrap items-center gap-1 rounded-4xl border border-input bg-input/30 px-3 py-1.5 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
             disabled && "pointer-events-none opacity-50",
             className
           )}

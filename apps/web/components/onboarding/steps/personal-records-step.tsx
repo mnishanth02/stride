@@ -275,6 +275,11 @@ export function PersonalRecordsStep({
           className="space-y-6"
           noValidate
         >
+          <p className="text-muted-foreground text-sm">
+            Enter your best times below. Leave blank any distances you haven't
+            raced.
+          </p>
+
           <div className="space-y-5">
             {STANDARD_DISTANCES.map((dist, i) => {
               const key = fieldKeys[i]
@@ -368,20 +373,20 @@ export function PersonalRecordsStep({
           {/* Buttons */}
           <div className="flex items-center gap-3 pt-2">
             <Button type="button" variant="outline" size="md" onClick={onBack}>
-              <Icons.back className="size-4" />
+              <Icons.back data-icon="inline-start" />
               Back
             </Button>
             <Button type="submit" size="md" isLoading={isSubmitting}>
               Next
-              <Icons.chevronRight className="size-4" />
+              <Icons.chevronRight data-icon="inline-end" />
             </Button>
           </div>
         </form>
       </div>
 
       {/* Desktop card preview — 40%, sticky */}
-      <div className="hidden md:block md:w-[40%]">
-        <div className="md:sticky md:top-24">
+      <div className="hidden md:flex md:w-[40%] md:items-start md:justify-center">
+        <div className="md:sticky md:top-24 md:pt-10">
           <CardPreview
             name={defaultValues?.userProfile?.fullName ?? ""}
             tagline={defaultValues?.userProfile?.tagline ?? ""}

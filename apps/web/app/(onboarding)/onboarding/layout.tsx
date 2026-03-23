@@ -11,11 +11,11 @@ export default async function OnboardingLayout({
   // Webhook race: Clerk session exists but DB row hasn't been created yet
   if (!user) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-4 py-8">
         <WebhookPendingFallback />
       </div>
     )
   }
 
-  return <div className="mx-auto max-w-2xl px-4 py-8">{children}</div>
+  return <div className="mx-auto max-w-4xl px-4 py-8">{children}</div>
 }

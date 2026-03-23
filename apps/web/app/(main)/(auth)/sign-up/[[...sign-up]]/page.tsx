@@ -41,11 +41,7 @@ export default function SignUpPage() {
 
   async function finalize() {
     await signUp.finalize({
-      navigate: ({ session, decorateUrl }) => {
-        if (session?.currentTask) {
-          router.push("/sign-up/tasks")
-          return
-        }
+      navigate: ({ decorateUrl }) => {
         const url = decorateUrl("/onboarding")
         if (url.startsWith("http")) {
           window.location.href = url
@@ -111,7 +107,7 @@ export default function SignUpPage() {
       await signUp.sso({
         strategy: "oauth_google",
         redirectCallbackUrl: "/sso-callback",
-        redirectUrl: "/sign-up/tasks",
+        redirectUrl: "/onboarding",
       })
     } catch (err) {
       if (err instanceof Error && !("clerkError" in err)) {

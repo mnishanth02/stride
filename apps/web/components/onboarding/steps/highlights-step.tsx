@@ -246,7 +246,7 @@ export function HighlightsStep({
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="mx-auto flex w-full max-w-md flex-col gap-6"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-6"
     >
       <p className="text-muted-foreground text-sm">
         Share your proudest running moments (optional — you can always add these
@@ -312,42 +312,43 @@ export function HighlightsStep({
               )}
             </div>
 
-            {/* Date */}
-            <div className="flex flex-col gap-1.5">
-              <Label>Date</Label>
-              <Controller
-                name={`highlights.${index}.highlightDate`}
-                control={form.control}
-                render={({ field: dateField }) => (
-                  <DatePicker
-                    value={dateField.value}
-                    onChange={dateField.onChange}
-                    placeholder="Pick a date"
-                    maxDate={new Date()}
-                  />
-                )}
-              />
-            </div>
+            {/* Date + Image — side-by-side on desktop */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label>Date</Label>
+                <Controller
+                  name={`highlights.${index}.highlightDate`}
+                  control={form.control}
+                  render={({ field: dateField }) => (
+                    <DatePicker
+                      value={dateField.value}
+                      onChange={dateField.onChange}
+                      placeholder="Pick a date"
+                      maxDate={new Date()}
+                    />
+                  )}
+                />
+              </div>
 
-            {/* Image */}
-            <div className="flex flex-col gap-1.5">
-              <Label>Image</Label>
-              <Controller
-                name={`highlights.${index}.imageUrl`}
-                control={form.control}
-                render={({ field: imageField }) => (
-                  <FileUpload
-                    shape="square"
-                    onChange={(file) => handleImageChange(file, index)}
-                    onError={(error) => toast.error(error)}
-                    previewUrl={
-                      imageField.value ||
-                      defaultValues?.highlights?.[index]?.imageUrl
-                    }
-                    disabled={uploadingIndex === index}
-                  />
-                )}
-              />
+              <div className="flex flex-col gap-1.5">
+                <Label>Image</Label>
+                <Controller
+                  name={`highlights.${index}.imageUrl`}
+                  control={form.control}
+                  render={({ field: imageField }) => (
+                    <FileUpload
+                      shape="square"
+                      onChange={(file) => handleImageChange(file, index)}
+                      onError={(error) => toast.error(error)}
+                      previewUrl={
+                        imageField.value ||
+                        defaultValues?.highlights?.[index]?.imageUrl
+                      }
+                      disabled={uploadingIndex === index}
+                    />
+                  )}
+                />
+              </div>
             </div>
 
             {/* Remove button */}
@@ -381,14 +382,17 @@ export function HighlightsStep({
         </Button>
       )}
 
-      {/* Bottom buttons */}
-      <div className="flex flex-col gap-3">
+      {/* Bottom buttons — DOM order: Back → Skip → Finish (flex-col-reverse shows Finish on top on mobile) */}
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button
-          type="submit"
-          isLoading={isSubmitting}
-          disabled={isBusy || uploadingIndex !== null}
+          type="button"
+          variant="outline"
+          size="md"
+          disabled={isBusy}
+          onClick={onBack}
         >
-          Finish
+          <Icons.back data-icon="inline-start" />
+          Back
         </Button>
         <Button
           type="button"
@@ -400,12 +404,13 @@ export function HighlightsStep({
           Skip this step
         </Button>
         <Button
-          type="button"
-          variant="outline"
-          disabled={isBusy}
-          onClick={onBack}
+          type="submit"
+          size="md"
+          isLoading={isSubmitting}
+          disabled={isBusy || uploadingIndex !== null}
         >
-          Back
+          Finish
+          <Icons.check data-icon="inline-end" />
         </Button>
       </div>
     </form>
