@@ -224,9 +224,9 @@ function FileUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+            className="absolute inset-0 flex items-center justify-center bg-foreground/60 opacity-0 transition-opacity focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
           >
-            <span className="font-medium text-sm text-white">Remove</span>
+            <span className="font-medium text-background text-sm">Remove</span>
           </button>
         )}
       </div>

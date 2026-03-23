@@ -41,6 +41,9 @@ function DatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         disabled={disabled}
+        aria-label={
+          value ? `Selected date: ${format(value, "PPP")}` : placeholder
+        }
         className={cn(
           "group/button inline-flex w-full shrink-0 select-none items-center justify-start gap-1.5 whitespace-nowrap rounded-4xl border border-border bg-input/30 px-3 py-2 text-left font-normal text-sm outline-none transition-all hover:bg-input/50 hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50",
           !value && "text-muted-foreground",

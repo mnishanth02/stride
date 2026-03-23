@@ -22,6 +22,7 @@ function TextareaWithCounter({
     () => String(value ?? defaultValue ?? "").length
   )
   const internalRef = React.useRef<HTMLTextAreaElement | null>(null)
+  const counterId = React.useId()
 
   // Sync counter when controlled value changes externally (e.g. form reset)
   React.useEffect(() => {
@@ -58,10 +59,13 @@ function TextareaWithCounter({
         defaultValue={defaultValue}
         onChange={handleChange}
         maxLength={maxLength}
+        aria-describedby={counterId}
         className={className}
         {...props}
       />
       <p
+        id={counterId}
+        aria-live={length >= warningThreshold ? "polite" : undefined}
         className={cn(
           "text-right text-xs",
           length >= maxLength

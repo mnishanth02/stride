@@ -57,6 +57,11 @@ function MultiSelect({
           role="combobox"
           aria-expanded={open}
           aria-haspopup="listbox"
+          aria-label={
+            selectedLabels.length > 0
+              ? selectedLabels.map((o) => o.label).join(", ")
+              : placeholder
+          }
           tabIndex={disabled ? -1 : 0}
           className={cn(
             "flex min-h-9 w-full flex-wrap items-center gap-1 rounded-4xl border border-input bg-input/30 px-3 py-1.5 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",

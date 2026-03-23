@@ -35,7 +35,8 @@ function Button({
       </span>
       {isLoading && (
         <span className="absolute inset-0 inline-flex items-center justify-center">
-          <CircleNotch className="animate-spin" />
+          <CircleNotch className="animate-spin" aria-hidden="true" />
+          <span className="sr-only">Loading</span>
         </span>
       )}
     </ButtonPrimitive>

@@ -15,6 +15,34 @@ const dSlow = DURATION_SLOW / 1000
 export const EASE_OUT_CUBIC = [0.33, 1, 0.68, 1] as const
 export const EASE_SPRING = [0.34, 1.56, 0.64, 1] as const
 
+// Reduced-motion-safe variant: keeps opacity transitions, disables transforms
+function withReducedMotion(variants: Variants): Variants {
+  const safeVariants: Variants = {}
+  for (const [key, variant] of Object.entries(variants)) {
+    if (typeof variant !== "object" || variant === null) {
+      safeVariants[key] = variant
+      continue
+    }
+    const variantObj = variant as Record<string, unknown>
+    const { x, y, scale, ...rest } = variantObj
+    const existingTransition = variantObj.transition
+    safeVariants[key] = {
+      ...rest,
+      ...(x !== undefined && { x: 0 }),
+      ...(y !== undefined && { y: 0 }),
+      ...(scale !== undefined && { scale: 1 }),
+      transition:
+        existingTransition != null && typeof existingTransition === "object"
+          ? {
+              ...(existingTransition as Record<string, unknown>),
+              duration: dBase,
+            }
+          : undefined,
+    }
+  }
+  return safeVariants
+}
+
 export const fadeInVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -64,4 +92,12 @@ export const scaleInVariants: Variants = {
   },
 }
 
-export { useReducedMotion }
+// Reduced-motion-safe variants — use these with useReducedMotion() hook
+export const fadeInSafe = withReducedMotion(fadeInVariants)
+export const slideUpSafe = withReducedMotion(slideUpVariants)
+export const staggerContainerSafe = withReducedMotion(staggerContainerVariants)
+export const staggerItemSafe = withReducedMotion(staggerItemVariants)
+export const pageVariantsSafe = withReducedMotion(pageVariants)
+export const scaleInSafe = withReducedMotion(scaleInVariants)
+
+export { useReducedMotion, withReducedMotion }

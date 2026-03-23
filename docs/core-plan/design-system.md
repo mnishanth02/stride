@@ -337,23 +337,27 @@ mono:    "JetBrains Mono", "Courier New", monospace
 | `3xl` | 48px |
 | `full` | 9999px |
 
+> **Note:** This project uses the shadcn/ui `base-maia` style which features pill-shaped interactive elements (`rounded-4xl`). This creates a modern, friendly aesthetic consistent across all form controls and buttons.
+
 ### Component Mapping
 
 | Component | Radius Token | Value |
 |-----------|-------------|-------|
-| Button | `rounded-base` | 8px |
-| Input / Select / Textarea | `rounded-sm` | 6px |
-| Card | `rounded-lg` | 16px |
+| Button | `rounded-4xl` | 9999px (pill) |
+| Input / Select / Textarea | `rounded-4xl` / `rounded-xl` | 9999px (pill) / 16px |
+| Card | `rounded-2xl` | 32px |
 | Badge (pill) | `rounded-full` | 9999px |
 | Avatar | `rounded-full` | 9999px |
-| Modal / Dialog | `rounded-xl` | 24px |
-| Tooltip | `rounded-md` | 12px |
-| Dropdown | `rounded-md` | 12px |
+| Modal / Dialog | `rounded-4xl` | 9999px (pill) |
+| Tooltip | `rounded-2xl` | 32px |
+| Dropdown | `rounded-2xl` | 32px |
 | Toast | `rounded-lg` | 16px |
-| Hero section | `rounded-3xl` | 48px |
-| Search bar | `rounded-full` | 9999px |
-| Cookie banner | `rounded-t-xl` | 24px top only |
-| Mobile peek bar | `rounded-t-xl` | 24px top only |
+| Popover | `rounded-2xl` | 32px |
+| Select Content | `rounded-2xl` | 32px |
+| Select Item | `rounded-xl` | 16px |
+| Dropdown Item | `rounded-xl` | 16px |
+| Tabs List (default) | `rounded-4xl` | 9999px (pill) |
+| Tabs Trigger | `rounded-xl` | 16px |
 
 ---
 
@@ -387,8 +391,8 @@ mono:    "JetBrains Mono", "Courier New", monospace
 
 | Component / State | Shadow Token |
 |-------------------|-------------|
-| Card (resting) | `shadow-e2` |
-| Card (hovered) | `shadow-e4` |
+| Card (resting) | `ring-1 ring-foreground/10` (subtle ring, not shadow) |
+| Card (hovered) | `shadow-e4` (if interactive) |
 | Featured card | `shadow-e3` |
 | Dropdown | `shadow-e4` |
 | Modal / Dialog | `shadow-e5` |
@@ -581,7 +585,7 @@ Library: **`@phosphor-icons/react`** v2.1.10
 
 **Defaults:** `primary` / `md`
 
-**All buttons:** `rounded-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`
+**All buttons:** `rounded-4xl` (pill shape per base-maia theme) `transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`
 
 **Loading State (`isLoading`):**
 - Replace the standard icon (if any) or add a natively spinning `CircleNotch` icon.
@@ -593,8 +597,9 @@ Library: **`@phosphor-icons/react`** v2.1.10
 ### Card
 
 - No border
-- `shadow-e2 rounded-lg`
+- `ring-1 ring-foreground/10 rounded-2xl` (ring border, no resting shadow)
 - Interactive: `hover:shadow-e4 transition-shadow duration-200`
+- Size variants: `default` (py-6, gap-6) and `sm` (py-4, gap-4)
 - Card title: `font-display`
 - Time/data values: `font-mono`
 
@@ -615,8 +620,8 @@ Library: **`@phosphor-icons/react`** v2.1.10
 
 ### Input
 
-- `border-2 border-slate-200 dark:border-slate-700 rounded-sm bg-white dark:bg-slate-900 px-4 py-3`
-- Focus: `focus:border-lime-500 focus:ring-2 focus:ring-lime-200 dark:focus:ring-lime-800 focus:shadow-inset`
+- `border border-input bg-input/30 rounded-4xl` (pill shape per base-maia)
+- Focus: `focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50`
 - Placeholder: `placeholder-slate-400 dark:placeholder-slate-500`
 - `transition-all duration-200`
 
@@ -624,8 +629,8 @@ Library: **`@phosphor-icons/react`** v2.1.10
 
 ### Dialog
 
-- Overlay: `bg-black/40 backdrop-blur-sm`
-- Content: `rounded-xl border-0 shadow-e5 dark:bg-slate-900`
+- Overlay: `bg-black/80 backdrop-blur-xs`
+- Content: `rounded-4xl ring-1 ring-foreground/5 bg-background p-6`
 - Animation: overlay opacity 0→1 (200ms); content opacity 0→1 + scale 0.95→1 + y 20→0 (300ms) via Motion `AnimatePresence`
 
 ---
@@ -646,7 +651,7 @@ Library: **`@phosphor-icons/react`** v2.1.10
 
 ### Select
 
-- Lime focus ring, `rounded-sm`
+- `rounded-4xl` trigger (pill shape), `rounded-2xl` content dropdown, lime focus ring
 
 ### Separator
 
@@ -654,11 +659,11 @@ Library: **`@phosphor-icons/react`** v2.1.10
 
 ### Tooltip
 
-- `rounded-md shadow-e3 text-sm`
+- `rounded-2xl text-xs bg-foreground text-background`
 
 ### DropdownMenu
 
-- `rounded-md shadow-e4 divide-y`
+- `rounded-2xl shadow-2xl ring-1 ring-foreground/5 p-1`
 
 ### Avatar
 
@@ -666,7 +671,8 @@ Library: **`@phosphor-icons/react`** v2.1.10
 
 ### Tabs
 
-- Lime-500 active indicator underline
+- `bg-primary` active indicator underline (line variant)
+- Tab list: `rounded-4xl bg-muted` (default), or transparent (line variant)
 - Tab labels: `font-display`
 
 ---
@@ -719,6 +725,12 @@ Library: **`@phosphor-icons/react`** v2.1.10
 - Placeholder: `text-slate-400` matching format
 - Inherits base Input styling
 - `font-mono`
+
+---
+
+### Textarea
+
+- `resize-none rounded-xl min-h-16 border border-input bg-input/30 field-sizing-content`
 
 ---
 
@@ -844,3 +856,43 @@ Cache: `revalidate: 3600` (1 hour).
 
 - Square: `zealerprofile-{username}-square.png`
 - Stories: `zealerprofile-{username}-stories.png`
+
+---
+
+## 15. Component Accessibility Checklist
+
+All components must meet WCAG 2.1 AA. Key requirements by component type:
+
+### Interactive Elements (Button, Input, Select, Checkbox, Switch)
+- Focus visible indicator: `focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50`
+- Disabled state: `disabled:pointer-events-none disabled:opacity-50`
+- Invalid state: `aria-invalid:border-destructive aria-invalid:ring-destructive/20`
+- Touch targets: minimum 44×44px (use pseudo-element padding if needed)
+
+### Loading States
+- Button: `aria-busy="true"` when loading + `sr-only` "Loading" text
+- Skeleton: `aria-hidden="true"` (decorative placeholder)
+- Progress: inherit from @base-ui primitives (role, aria-valuenow, etc.)
+
+### Form Fields
+- Every field must have a visible `<Label>` with matching `htmlFor`
+- Character counters must be linked via `aria-describedby`
+- Counter updates must use `aria-live="polite"` for screen reader announcements
+- Error messages: `text-destructive text-sm mt-1` inline below field
+
+### Composite Components (MultiSelect, DatePicker, DropdownMenu)
+- Trigger must have `aria-label` describing purpose
+- Trigger must expose `aria-expanded` state
+- Popover/dropdown content must be keyboard navigable
+
+### Color Contrast (from §3 and §4.5)
+- Never use lime-500 as text on light backgrounds (1.61:1 — fails)
+- Lime-800 minimum for lime text on white (6.77:1 ✓)
+- Lime-500 safe as background with slate-900 text (11.08:1 ✓)
+- White on azure-500 safe (5.07:1 ✓)
+- White on purple-600 safe (4.62:1 ✓)
+
+### Reduced Motion
+- All Motion variants must have `*Safe` alternatives (see `animations.ts`)
+- Use `useReducedMotion()` hook to select appropriate variant set
+- CSS fallback in `globals.css` handles Tailwind animations
