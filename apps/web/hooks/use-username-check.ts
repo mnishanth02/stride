@@ -51,11 +51,21 @@ export function useUsernameCheck(
   })
 
   if (isOwnUsername) {
-    return { isAvailable: true, isChecking: false, reason: null, isError: false }
+    return {
+      isAvailable: true,
+      isChecking: false,
+      reason: null,
+      isError: false,
+    }
   }
 
   if (!debouncedUsername || debouncedUsername.length < 3) {
-    return { isAvailable: null, isChecking: false, reason: null, isError: false }
+    return {
+      isAvailable: null,
+      isChecking: false,
+      reason: null,
+      isError: false,
+    }
   }
 
   if (isLoading || isFetching) {

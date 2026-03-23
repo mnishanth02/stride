@@ -39,6 +39,23 @@ export default function SignUpPage() {
 
   const isFetching = fetchStatus === "fetching"
 
+  async function finalize() {
+    await signUp.finalize({
+      navigate: ({ session, decorateUrl }) => {
+        if (session?.currentTask) {
+          router.push("/sign-up/tasks")
+          return
+        }
+        const url = decorateUrl("/onboarding")
+        if (url.startsWith("http")) {
+          window.location.href = url
+        } else {
+          router.push(url)
+        }
+      },
+    })
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setGlobalError(null)
@@ -58,7 +75,9 @@ export default function SignUpPage() {
     try {
       await signUp.password({ emailAddress: email, password })
 
-      if (signUp.status === "missing_requirements") {
+      if (signUp.status === "complete") {
+        await finalize()
+      } else if (signUp.status === "missing_requirements") {
         await signUp.verifications.sendEmailCode()
         setStep("verify")
       }
@@ -77,20 +96,7 @@ export default function SignUpPage() {
       await signUp.verifications.verifyEmailCode({ code })
 
       if (signUp.status === "complete") {
-        await signUp.finalize({
-          navigate: ({ session, decorateUrl }) => {
-            if (session?.currentTask) {
-              router.push("/sign-up/tasks")
-              return
-            }
-            const url = decorateUrl("/onboarding")
-            if (url.startsWith("http")) {
-              window.location.href = url
-            } else {
-              router.push(url)
-            }
-          },
-        })
+        await finalize()
       }
     } catch (err) {
       if (err instanceof Error && !("clerkError" in err)) {

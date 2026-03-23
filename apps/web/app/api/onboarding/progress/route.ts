@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 import { db } from "@workspace/database/client"
 import { highlights, personalRecords, users } from "@workspace/database/schema"
 import { asc, eq } from "drizzle-orm"
@@ -12,17 +12,53 @@ export async function GET(_req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const user = await db.query.users.findFirst({
+    let user = await db.query.users.findFirst({
       where: eq(users.clerkId, userId),
     })
 
     if (!user) {
-      return NextResponse.json({
-        step: 1,
-        user: null,
-        records: [],
-        highlights: [],
-      })
+      // Self-healing: webhook may have been missed — create the DB row
+      // from Clerk's authoritative user data.
+      try {
+        const client = await clerkClient()
+        const clerkUser = await client.users.getUser(userId)
+        const primaryEmail =
+          clerkUser.emailAddresses.find(
+            (e) => e.id === clerkUser.primaryEmailAddressId
+          ) ?? clerkUser.emailAddresses[0]
+
+        const [inserted] = await db
+          .insert(users)
+          .values({
+            clerkId: userId,
+            email: primaryEmail?.emailAddress ?? "",
+            emailVerified: primaryEmail?.verification?.status === "verified",
+            fullName:
+              [clerkUser.firstName, clerkUser.lastName]
+                .filter(Boolean)
+                .join(" ") || null,
+            avatarUrl: clerkUser.imageUrl ?? null,
+          })
+          .onConflictDoNothing({ target: users.clerkId })
+          .returning()
+
+        user =
+          inserted ??
+          (await db.query.users.findFirst({
+            where: eq(users.clerkId, userId),
+          }))
+      } catch (healErr) {
+        console.error("Self-healing user creation failed:", healErr)
+      }
+
+      if (!user) {
+        return NextResponse.json({
+          step: 1,
+          user: null,
+          records: [],
+          highlights: [],
+        })
+      }
     }
 
     // Determine current step

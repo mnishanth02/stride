@@ -93,7 +93,14 @@ export default function SignInPage() {
           await signIn.mfa.sendEmailCode()
           setStep("needs_client_trust")
         } else {
-          setStep("needs_second_factor")
+          // No email_code factor available for device trust — attempt
+          // to finalize directly; Clerk may still complete the sign-in
+          // when the session already satisfies the trust requirements.
+          try {
+            await finalize()
+          } catch {
+            setStep("needs_second_factor")
+          }
         }
       } else if (signIn.status === "needs_second_factor") {
         setStep("needs_second_factor")

@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Button } from "@workspace/ui/components/button"
 import {
   Skeleton,
   SkeletonHeading,
@@ -11,10 +12,9 @@ import {
   slideUpVariants,
   useReducedMotion,
 } from "@workspace/ui/lib/animations"
+import { Icons } from "@workspace/ui/lib/icons"
 import { AnimatePresence, motion } from "motion/react"
 import { useRouter } from "next/navigation"
-import { Button } from "@workspace/ui/components/button"
-import { Icons } from "@workspace/ui/lib/icons"
 import { Suspense, useEffect, useRef } from "react"
 
 import { StepIndicator } from "@/components/onboarding/step-indicator"
@@ -45,7 +45,12 @@ function OnboardingWizard() {
 
   const queryClient = useQueryClient()
 
-  const { data: progress, isLoading, isError, refetch } = useQuery({
+  const {
+    data: progress,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["onboarding-progress"],
     queryFn: async () => {
       const res = await fetch("/api/onboarding/progress")
@@ -73,13 +78,13 @@ function OnboardingWizard() {
     initialSyncDone.current = true
   }, [progress, currentStep, goToStep, router])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: focus must move on step change
   useEffect(() => {
     const timer = setTimeout(() => {
       stepContainerRef.current?.focus()
     }, 100)
     return () => clearTimeout(timer)
-    // eslint-disable-next-line -- intentionally re-run on step change
-  }, [currentStep]) // biome-ignore lint/correctness/useExhaustiveDependencies: focus must move on step change
+  }, [currentStep])
 
   if (isLoading) {
     return <OnboardingLoading />
@@ -136,7 +141,9 @@ function OnboardingWizard() {
                   : undefined
               }
               onComplete={() => {
-                queryClient.invalidateQueries({ queryKey: ["onboarding-progress"] })
+                queryClient.invalidateQueries({
+                  queryKey: ["onboarding-progress"],
+                })
                 nextStep()
               }}
             />
@@ -161,7 +168,9 @@ function OnboardingWizard() {
                 },
               }}
               onComplete={() => {
-                queryClient.invalidateQueries({ queryKey: ["onboarding-progress"] })
+                queryClient.invalidateQueries({
+                  queryKey: ["onboarding-progress"],
+                })
                 nextStep()
               }}
               onBack={prevStep}

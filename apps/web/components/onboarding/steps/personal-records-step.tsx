@@ -101,7 +101,8 @@ export function PersonalRecordsStep({
   const customLabelId = useId()
   const customTimeId = useId()
 
-  const { values: initialValues, droppedCustomCount } = getInitialValues(defaultValues)
+  const { values: initialValues, droppedCustomCount } =
+    getInitialValues(defaultValues)
 
   // Show custom section if there are pre-existing custom values
   useEffect(() => {

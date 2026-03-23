@@ -19,12 +19,6 @@ export default function NotFound() {
         <Link href="/" className={buttonVariants()}>
           Go home
         </Link>
-        <Link
-          href="/explore"
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Explore athletes
-        </Link>
       </div>
     </div>
   )

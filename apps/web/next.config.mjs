@@ -24,6 +24,14 @@ const nextConfig = {
     "@workspace/database",
     "@workspace/storage",
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+    ],
+  },
 }
 
 export default nextConfig

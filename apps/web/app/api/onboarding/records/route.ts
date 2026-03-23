@@ -94,14 +94,10 @@ export async function POST(request: Request) {
       )
     }
 
-    await db.transaction(async (tx) => {
-      await tx
-        .delete(personalRecords)
-        .where(eq(personalRecords.userId, user.id))
-      if (validRecords.length > 0) {
-        await tx.insert(personalRecords).values(validRecords)
-      }
-    })
+    await db.delete(personalRecords).where(eq(personalRecords.userId, user.id))
+    if (validRecords.length > 0) {
+      await db.insert(personalRecords).values(validRecords)
+    }
 
     return NextResponse.json({
       success: true,
@@ -109,9 +105,10 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error("Records save failed:", error)
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 }
-    )
+    const message =
+      process.env.NODE_ENV === "development" && error instanceof Error
+        ? error.message
+        : "Something went wrong. Please try again."
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

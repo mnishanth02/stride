@@ -169,8 +169,10 @@ export function CompletionView({
         >
           <motion.div {...resolvedStaggerItem}>
             <Tooltip>
-              <TooltipTrigger>
-                <Button variant="outline" disabled className="w-full sm:w-auto">
+              <TooltipTrigger
+                render={<span className="inline-flex w-full sm:w-auto" />}
+              >
+                <Button variant="outline" disabled className="w-full">
                   <Icons.user className="mr-2 size-4" />
                   View My Profile
                 </Button>
@@ -183,8 +185,10 @@ export function CompletionView({
 
           <motion.div {...resolvedStaggerItem}>
             <Tooltip>
-              <TooltipTrigger>
-                <Button variant="outline" disabled className="w-full sm:w-auto">
+              <TooltipTrigger
+                render={<span className="inline-flex w-full sm:w-auto" />}
+              >
+                <Button variant="outline" disabled className="w-full">
                   <Icons.copyLink className="mr-2 size-4" />
                   Copy Profile Link
                 </Button>
@@ -195,8 +199,10 @@ export function CompletionView({
 
           <motion.div {...resolvedStaggerItem}>
             <Tooltip>
-              <TooltipTrigger>
-                <Button variant="outline" disabled className="w-full sm:w-auto">
+              <TooltipTrigger
+                render={<span className="inline-flex w-full sm:w-auto" />}
+              >
+                <Button variant="outline" disabled className="w-full">
                   <Icons.download className="mr-2 size-4" />
                   Download Card
                 </Button>

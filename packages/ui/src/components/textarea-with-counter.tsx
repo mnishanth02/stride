@@ -15,15 +15,25 @@ function TextareaWithCounter({
   defaultValue,
   onChange,
   className,
+  ref,
   ...props
-}: TextareaWithCounterProps) {
+}: TextareaWithCounterProps & { ref?: React.Ref<HTMLTextAreaElement> }) {
   const [length, setLength] = React.useState(
     () => String(value ?? defaultValue ?? "").length
   )
+  const internalRef = React.useRef<HTMLTextAreaElement | null>(null)
 
   // Sync counter when controlled value changes externally (e.g. form reset)
   React.useEffect(() => {
     if (value !== undefined) setLength(String(value).length)
+  }, [value])
+
+  // Sync counter with DOM value on mount (handles react-hook-form register() pattern)
+  React.useEffect(() => {
+    if (value === undefined && internalRef.current) {
+      const domLength = internalRef.current.value.length
+      if (domLength > 0) setLength(domLength)
+    }
   }, [value])
 
   const warningThreshold = Math.floor(maxLength * 0.9)
@@ -33,9 +43,17 @@ function TextareaWithCounter({
     onChange?.(e)
   }
 
+  function mergedRef(node: HTMLTextAreaElement | null) {
+    internalRef.current = node
+    if (typeof ref === "function") ref(node)
+    else if (ref)
+      (ref as React.RefObject<HTMLTextAreaElement | null>).current = node
+  }
+
   return (
     <div className="space-y-1.5">
       <Textarea
+        ref={mergedRef}
         value={value}
         defaultValue={defaultValue}
         onChange={handleChange}

@@ -150,7 +150,9 @@ export function ProfileBasicsStep({
       }
       if (isAvailable === null) {
         if (isError) {
-          toast.error("Couldn't verify username availability. Please try again.")
+          toast.error(
+            "Couldn't verify username availability. Please try again."
+          )
           form.setError("username", {
             type: "manual",
             message: "Username check failed — please try again",

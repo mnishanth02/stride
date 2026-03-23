@@ -69,7 +69,9 @@ export async function POST(request: Request) {
         if (h.highlightDate) {
           // Validate YYYY-MM-DD format
           if (!/^\d{4}-\d{2}-\d{2}$/.test(h.highlightDate)) {
-            errors.push(`Highlight ${index + 1}: date must be in YYYY-MM-DD format`)
+            errors.push(
+              `Highlight ${index + 1}: date must be in YYYY-MM-DD format`
+            )
             return
           }
           const date = new Date(`${h.highlightDate}T00:00:00`)
@@ -107,18 +109,16 @@ export async function POST(request: Request) {
       })
     )
 
-    await db.transaction(async (tx) => {
-      await tx.delete(highlights).where(eq(highlights.userId, user.id))
-      if (validHighlights.length > 0) {
-        await tx.insert(highlights).values(validHighlights)
-      }
-      if (shouldComplete) {
-        await tx
-          .update(users)
-          .set({ onboardingCompleted: true, updatedAt: new Date() })
-          .where(eq(users.id, user.id))
-      }
-    })
+    await db.delete(highlights).where(eq(highlights.userId, user.id))
+    if (validHighlights.length > 0) {
+      await db.insert(highlights).values(validHighlights)
+    }
+    if (shouldComplete) {
+      await db
+        .update(users)
+        .set({ onboardingCompleted: true, updatedAt: new Date() })
+        .where(eq(users.id, user.id))
+    }
 
     return NextResponse.json({
       success: true,
