@@ -260,11 +260,12 @@ export function PersonalRecordsStep({
   return (
     <div className="md:flex md:gap-8">
       {/* Mobile card preview */}
-      <div className="mb-6 md:hidden">
+      <div className="mb-6 flex justify-center md:hidden">
         <CardPreview
           name={defaultValues?.userProfile?.fullName ?? ""}
           tagline={defaultValues?.userProfile?.tagline ?? ""}
           records={liveRecords}
+          className="max-w-70"
         />
       </div>
 
@@ -386,7 +387,7 @@ export function PersonalRecordsStep({
 
       {/* Desktop card preview — 40%, sticky */}
       <div className="hidden md:flex md:w-[40%] md:items-start md:justify-center">
-        <div className="md:sticky md:top-24 md:pt-10">
+        <div className="w-full max-w-90 md:sticky md:top-24 md:pt-10">
           <CardPreview
             name={defaultValues?.userProfile?.fullName ?? ""}
             tagline={defaultValues?.userProfile?.tagline ?? ""}

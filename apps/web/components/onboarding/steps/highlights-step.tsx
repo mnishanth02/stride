@@ -256,7 +256,7 @@ export function HighlightsStep({
       {fields.map((field, index) => (
         <Card key={field.id}>
           <CardContent className="flex flex-col gap-4 pt-6">
-            {/* Title */}
+            {/* Title — full width */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor={`highlights.${index}.title`}>Title</Label>
               <Input
@@ -272,65 +272,66 @@ export function HighlightsStep({
               )}
             </div>
 
-            {/* Distance + Duration row */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor={`highlights.${index}.distanceText`}>
-                  Distance
-                </Label>
-                <Input
-                  id={`highlights.${index}.distanceText`}
-                  placeholder="e.g. 18 km"
-                  {...form.register(`highlights.${index}.distanceText`)}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor={`highlights.${index}.durationText`}>
-                  Duration
-                </Label>
-                <Input
-                  id={`highlights.${index}.durationText`}
-                  placeholder="e.g. 2h 45m"
-                  {...form.register(`highlights.${index}.durationText`)}
-                />
-              </div>
-            </div>
+            {/* Two-column: metadata (left) + image (right) */}
+            <div className="flex flex-col gap-4 sm:flex-row">
+              {/* Left column — stacked metadata fields */}
+              <div className="flex min-w-0 flex-1 flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor={`highlights.${index}.distanceText`}>
+                    Distance
+                  </Label>
+                  <Input
+                    id={`highlights.${index}.distanceText`}
+                    placeholder="e.g. 18 km"
+                    {...form.register(`highlights.${index}.distanceText`)}
+                  />
+                </div>
 
-            {/* Story */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`highlights.${index}.story`}>Story</Label>
-              <TextareaWithCounter
-                id={`highlights.${index}.story`}
-                maxLength={TEXT_LIMITS.highlightStory.max}
-                placeholder="Tell us about this highlight…"
-                {...form.register(`highlights.${index}.story`)}
-              />
-              {errors.highlights?.[index]?.story && (
-                <p className="mt-1 text-destructive text-sm">
-                  {errors.highlights[index].story.message}
-                </p>
-              )}
-            </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor={`highlights.${index}.durationText`}>
+                    Duration
+                  </Label>
+                  <Input
+                    id={`highlights.${index}.durationText`}
+                    placeholder="e.g. 2h 45m"
+                    {...form.register(`highlights.${index}.durationText`)}
+                  />
+                </div>
 
-            {/* Date + Image — side-by-side on desktop */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <Label>Date</Label>
-                <Controller
-                  name={`highlights.${index}.highlightDate`}
-                  control={form.control}
-                  render={({ field: dateField }) => (
-                    <DatePicker
-                      value={dateField.value}
-                      onChange={dateField.onChange}
-                      placeholder="Pick a date"
-                      maxDate={new Date()}
-                    />
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor={`highlights.${index}.story`}>Story</Label>
+                  <TextareaWithCounter
+                    id={`highlights.${index}.story`}
+                    maxLength={TEXT_LIMITS.highlightStory.max}
+                    placeholder="Tell us about this highlight…"
+                    {...form.register(`highlights.${index}.story`)}
+                  />
+                  {errors.highlights?.[index]?.story && (
+                    <p className="mt-1 text-destructive text-sm">
+                      {errors.highlights[index].story.message}
+                    </p>
                   )}
-                />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label>Date</Label>
+                  <Controller
+                    name={`highlights.${index}.highlightDate`}
+                    control={form.control}
+                    render={({ field: dateField }) => (
+                      <DatePicker
+                        value={dateField.value}
+                        onChange={dateField.onChange}
+                        placeholder="Pick a date"
+                        maxDate={new Date()}
+                      />
+                    )}
+                  />
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              {/* Right column — tall image upload spanning full height */}
+              <div className="flex w-full flex-col gap-1.5 sm:w-56">
                 <Label>Image</Label>
                 <Controller
                   name={`highlights.${index}.imageUrl`}
@@ -345,6 +346,7 @@ export function HighlightsStep({
                         defaultValues?.highlights?.[index]?.imageUrl
                       }
                       disabled={uploadingIndex === index}
+                      className="sm:aspect-auto sm:h-full sm:min-h-52 sm:max-w-none"
                     />
                   )}
                 />

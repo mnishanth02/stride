@@ -2,20 +2,42 @@
 
 This file is automatically maintained by workspace GitHub Copilot hooks. It captures meaningful AI-assisted progress — features, bug fixes, refactors, infrastructure changes, and design decisions — rather than every prompt or tool call.
 
-- **Last updated:** 2026-03-23T18:02:16.235Z
+- **Last updated:** 2026-03-24T09:45:41.656Z
 - **Tracking mode:** Smart filtering (only significant sessions are logged)
 - **Hook config:** `.github/hooks/project-status.json`
 
 ## Current Session
 
-- **Status:** In progress
-- **Session ID:** 15ce5b7b-1834-4c76-a06b-d671a6de4c79
-- **Started:** 1774287979075
-- **Focus:** Awaiting task details
-- **Touched files:**
-  - None yet
+- **Status:** Idle
+- **Session ID:** —
+- **Started:** —
+- **Touched files:** None
 
 ## Feature Progress
+
+### Web App
+> 7 sessions · Last updated: 2026-03-24
+
+- **2026-03-24** [Feature] Thorough exploration: I need to understand the card preview component used in the onboarding flow. 1. Read the full contents of `apps/web/components/onboarding/card-preview.tsx` 2. Check what ... Modified files in apps.
+  — `apps/web/components/onboarding/steps/highlights-step.tsx`
+
+- **2026-03-24** [Feature] Thorough exploration: I need to understand the card preview component used in the onboarding flow. 1. Read the full contents of `apps/web/components/onboarding/card-preview.tsx` 2. Check what ... Modified files in apps.
+  — `apps/web/components/onboarding/steps/highlights-step.tsx`
+
+- **2026-03-24** [Feature] Thorough exploration: I need to understand the card preview component used in the onboarding flow. 1. Read the full contents of `apps/web/components/onboarding/card-preview.tsx` 2. Check what ... Modified files in apps.
+  — `apps/web/components/onboarding/steps/highlights-step.tsx`
+
+- **2026-03-24** [Feature] Thorough exploration: I need to understand the card preview component used in the onboarding flow. 1. Read the full contents of `apps/web/components/onboarding/card-preview.tsx` 2. Check what ... Modified files in apps.
+  — `apps/web/components/onboarding/card-preview.tsx`, `apps/web/components/onboarding/steps/personal-records-step.tsx`, `apps/web/components/onboarding/steps/highlights-step.tsx`, `apps/web/components/onboarding/completion-view.tsx`
+
+- **2026-03-22** [Feature] Thorough exploration. I need to understand the complete authentication and routing flow in this Next.js app. Please read and report the FULL contents of these files: 1. apps/web/proxy.ts — rout... Modified files in apps.
+  — `apps/web/app/(main)/page.tsx`
+
+- **2026-03-22** [Feature] Modified files in apps.
+  — `apps/web/components/theme-provider.tsx`, `apps/web/app/layout.tsx`, `apps/web/package.json`, `apps/web/next.config.mjs`
+
+- **2026-03-21** [Feature] Thorough exploration. I need to understand the complete AI Activity Log hook system in this repo: 1. Read `.github/hooks/project-status.json` fully 2. Read `AI_ACTIVITY_LOG.md` fully 3. Search... Modified files in apps.
+  — `apps/web/app/layout.tsx`
 
 ### Shared UI & Web App
 > 3 sessions · Last updated: 2026-03-23
@@ -83,18 +105,6 @@ This file is automatically maintained by workspace GitHub Copilot hooks. It capt
 - **2026-03-23** [Infrastructure] Research the auth/onboarding workflow in this codebase thoroughly. I need to understand: 1. Read apps/web/app/(main)/page.tsx - the main page that checks onboarding status 2. Read apps/web/app/... Modified files in packages and apps.
   — `packages/database/seed-users.mjs`, `apps/web/app/(main)/(auth)/sign-in/[[...sign-in]]/page.tsx`, `apps/web/app/api/onboarding/progress/route.ts`, `apps/web/lib/auth.ts`, +4 more
 
-### Web App
-> 3 sessions · Last updated: 2026-03-22
-
-- **2026-03-22** [Feature] Thorough exploration. I need to understand the complete authentication and routing flow in this Next.js app. Please read and report the FULL contents of these files: 1. apps/web/proxy.ts — rout... Modified files in apps.
-  — `apps/web/app/(main)/page.tsx`
-
-- **2026-03-22** [Feature] Modified files in apps.
-  — `apps/web/components/theme-provider.tsx`, `apps/web/app/layout.tsx`, `apps/web/package.json`, `apps/web/next.config.mjs`
-
-- **2026-03-21** [Feature] Thorough exploration. I need to understand the complete AI Activity Log hook system in this repo: 1. Read `.github/hooks/project-status.json` fully 2. Read `AI_ACTIVITY_LOG.md` fully 3. Search... Modified files in apps.
-  — `apps/web/app/layout.tsx`
-
 ### Vercel Environment Variables
 > 2 sessions · Last updated: 2026-03-22
 
@@ -105,7 +115,10 @@ This file is automatically maintained by workspace GitHub Copilot hooks. It capt
   — `.env`, `.env.example`, `docs/impl-plan/vercel-env-vars.md`
 
 ### General
-> 14 sessions · Last updated: 2026-03-23
+> 15 sessions · Last updated: 2026-03-24
+
+- **2026-03-24** [Design/Architecture] Thorough exploration: I need to understand the card preview component used in the onboarding flow. 1. Read the full contents of `apps/web/components/onboarding/card-preview.tsx` 2. Check what ...
+  — No file changes
 
 - **2026-03-23** [Design/Architecture] Thoroughly explore the onboarding flow in this codebase. I need to understand: 1. All onboarding step components - read every file in `apps/web/components/onboarding/steps/` 2. The onboarding ...
   — No file changes

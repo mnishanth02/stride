@@ -115,21 +115,21 @@ export function CompletionView({
         </motion.div>
 
         {/* Profile summary card + PR card — 2-column on desktop */}
-        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid w-full grid-cols-1 items-stretch gap-6 md:grid-cols-2">
           <motion.div {...resolvedFadeIn}>
-            <Card>
-              <CardContent className="flex flex-col items-center gap-4 p-6">
+            <Card className="h-full">
+              <CardContent className="flex h-full flex-col items-center justify-center gap-4 p-6">
                 {user.avatarUrl ? (
                   <Image
                     src={user.avatarUrl}
                     alt={user.fullName}
-                    width={64}
-                    height={64}
-                    className="size-16 rounded-full object-cover"
+                    width={80}
+                    height={80}
+                    className="size-20 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex size-16 items-center justify-center rounded-full bg-muted">
-                    <Icons.userCircle className="size-8 text-muted-foreground" />
+                  <div className="flex size-20 items-center justify-center rounded-full bg-muted">
+                    <Icons.userCircle className="size-10 text-muted-foreground" />
                   </div>
                 )}
 
@@ -170,6 +170,7 @@ export function CompletionView({
               name={user.fullName}
               tagline={user.tagline}
               records={records}
+              className="w-full"
             />
           </motion.div>
         </div>
